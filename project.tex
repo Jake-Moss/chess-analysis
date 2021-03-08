@@ -1,0 +1,150 @@
+% Created 2021-03-05 Fri 09:14
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage[main,include]{embedall}
+\IfFileExists{./\jobname.org}{\embedfile[desc=The original file]{\jobname.org}}{}
+
+
+
+
+
+\usepackage{fvextra}
+\fvset{
+  commandchars=\\\{\},
+  highlightcolor=white!95!black!80!blue,
+  breaklines=true,
+  breaksymbol=\color{white!60!black}\tiny\ensuremath{\hookrightarrow},
+}
+\renewcommand\theFancyVerbLine{\footnotesize\color{black!40!white}\arabic{FancyVerbLine}}
+
+\usepackage[many]{tcolorbox}
+\DeclareTColorBox[]{Code}{}%
+{enhanced,
+  colback=white!97!black,
+  colframe=white!94!black, boxrule=0.5pt,
+  fontupper=\color{EFD}\footnotesize,
+  arc=2.5pt, outer arc=2.5pt,
+  boxsep=2pt, left=2pt, right=2pt, top=1pt, bottom=0.5pt,
+  breakable}
+
+\definecolor{EFD}{HTML}{383a42}
+\definecolor{EFk}{HTML}{e45649}
+\newcommand{\EFk}[1]{\textcolor{EFk}{#1}} % font-lock-keyword-face
+\definecolor{EFd}{HTML}{84888b}
+\newcommand{\EFd}[1]{\textcolor{EFd}{\textit{#1}}} % font-lock-doc-face
+\definecolor{EFt}{HTML}{986801}
+\newcommand{\EFt}[1]{\textcolor{EFt}{#1}} % font-lock-type-face
+\definecolor{EFs}{HTML}{50a14f}
+\newcommand{\EFs}[1]{\textcolor{EFs}{#1}} % font-lock-string-face
+\definecolor{EFw}{HTML}{986801}
+\newcommand{\EFw}[1]{\textcolor{EFw}{#1}} % font-lock-warning-face
+\definecolor{EFb}{HTML}{a626a4}
+\newcommand{\EFb}[1]{\textcolor{EFb}{#1}} % font-lock-builtin-face
+\definecolor{EFct}{HTML}{9ca0a4}
+\newcommand{\EFct}[1]{\textcolor{EFct}{#1}} % font-lock-comment-face
+\definecolor{EFc}{HTML}{b751b6}
+\newcommand{\EFc}[1]{\textcolor{EFc}{#1}} % font-lock-constant-face
+\definecolor{EFpp}{HTML}{4078f2}
+\newcommand{\EFpp}[1]{\textcolor{EFpp}{\textbf{#1}}} % font-lock-preprocessor-face
+\definecolor{EFnc}{HTML}{4078f2}
+\newcommand{\EFnc}[1]{\textcolor{EFnc}{\textbf{#1}}} % font-lock-negation-char-face
+\definecolor{EFv}{HTML}{6a1868}
+\newcommand{\EFv}[1]{\textcolor{EFv}{#1}} % font-lock-variable-name-face
+\definecolor{EFf}{HTML}{a626a4}
+\newcommand{\EFf}[1]{\textcolor{EFf}{#1}} % font-lock-function-name-face
+\definecolor{EFcd}{HTML}{9ca0a4}
+\newcommand{\EFcd}[1]{\textcolor{EFcd}{#1}} % font-lock-comment-delimiter-face
+\definecolor{EFrc}{HTML}{4078f2}
+\newcommand{\EFrc}[1]{\textcolor{EFrc}{\textbf{#1}}} % font-lock-regexp-grouping-construct
+\definecolor{EFrb}{HTML}{4078f2}
+\newcommand{\EFrb}[1]{\textcolor{EFrb}{\textbf{#1}}} % font-lock-regexp-grouping-backslash
+\definecolor{EFhn}{HTML}{da8548}
+\newcommand{\EFhn}[1]{\textcolor{EFhn}{\textbf{#1}}} % highlight-numbers-number
+\definecolor{EFhq}{HTML}{4078f2}
+\newcommand{\EFhq}[1]{\textcolor{EFhq}{#1}} % highlight-quoted-quote
+\definecolor{EFhs}{HTML}{986801}
+\newcommand{\EFhs}[1]{\textcolor{EFhs}{#1}} % highlight-quoted-symbol
+\definecolor{EFrdi}{HTML}{4078f2}
+\newcommand{\EFrdi}[1]{\textcolor{EFrdi}{#1}} % rainbow-delimiters-depth-1-face
+\definecolor{EFrdii}{HTML}{a626a4}
+\newcommand{\EFrdii}[1]{\textcolor{EFrdii}{#1}} % rainbow-delimiters-depth-2-face
+\definecolor{EFrdiii}{HTML}{50a14f}
+\newcommand{\EFrdiii}[1]{\textcolor{EFrdiii}{#1}} % rainbow-delimiters-depth-3-face
+\definecolor{EFrdiv}{HTML}{da8548}
+\newcommand{\EFrdiv}[1]{\textcolor{EFrdiv}{#1}} % rainbow-delimiters-depth-4-face
+\definecolor{EFrdv}{HTML}{b751b6}
+\newcommand{\EFrdv}[1]{\textcolor{EFrdv}{#1}} % rainbow-delimiters-depth-5-face
+\definecolor{EFrdvi}{HTML}{986801}
+\newcommand{\EFrdvi}[1]{\textcolor{EFrdvi}{#1}} % rainbow-delimiters-depth-6-face
+\definecolor{EFrdvii}{HTML}{4db5bd}
+\newcommand{\EFrdvii}[1]{\textcolor{EFrdvii}{#1}} % rainbow-delimiters-depth-7-face
+\definecolor{EFrdiix}{HTML}{80a880}
+\newcommand{\EFrdiix}[1]{\textcolor{EFrdiix}{#1}} % rainbow-delimiters-depth-8-face
+\definecolor{EFrdix}{HTML}{887070}
+\newcommand{\EFrdix}[1]{\textcolor{EFrdix}{#1}} % rainbow-delimiters-depth-9-face
+\author{Jake Moss}
+\date{\today}
+\title{Project}
+\hypersetup{
+ pdfauthor={Jake Moss},
+ pdftitle={Project},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 28.0.50 (Org mode 9.5)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\begin{Code}
+\begin{Verbatim}[]
+\color{EFD}\EFk{def} \EFf{load\_pgn}(filename: \EFb{str}) -> \EFv{List}[chess.pgn.Game]:
+    \EFk{with} \EFb{open}(filename) \EFk{as} pgn:
+        games =[]
+        \EFk{while} \EFc{True}:
+            game = chess.pgn.read\_game(pgn)
+            \EFk{if} game \EFk{is} \EFk{not} \EFc{None}:
+                games.append(game)
+            \EFk{else}:
+                \EFk{break}
+        \EFk{return} games
+\end{Verbatim}
+\end{Code}
+
+\begin{Code}
+\begin{Verbatim}[]
+\color{EFD}\EFv{PIECE\_PATTERNS} = \{
+    \EFs{"All"}: [\EFs{'k'}, \EFs{'q'}, \EFs{'r'}, \EFs{'b'}, \EFs{'n'}, \EFs{'p'},
+            \EFs{'K'}, \EFs{'Q'}, \EFs{'R'}, \EFs{'B'}, \EFs{'N'}, \EFs{'P'}],
+    \EFs{"Black"}: [\EFs{'k'}, \EFs{'q'}, \EFs{'r'}, \EFs{'b'}, \EFs{'n'}, \EFs{'p'}],
+    \EFs{"White"}: [\EFs{'K'}, \EFs{'Q'}, \EFs{'R'}, \EFs{'B'}, \EFs{'N'}, \EFs{'P'}],
+    \EFs{"Black Major"}: [\EFs{'r'}, \EFs{'q'}],
+    \EFs{"White Major"}: [\EFs{'R'}, \EFs{'Q'}],
+    \EFs{"Black Minor"}: [\EFs{'k'}, \EFs{'b'}],
+    \EFs{"White Minor"}: [\EFs{'K'}, \EFs{'B'}],
+    \EFs{"Black Pawn"}: [\EFs{'p'}],
+    \EFs{"White Pawn"}: [\EFs{'P'}],
+    \EFs{"Kings"}: [\EFs{'k'}, \EFs{'K'}],
+    \EFs{"Queens"}: [\EFs{'q'}, \EFs{'Q'}],
+    \EFs{"Rooks"}: [\EFs{'r'}, \EFs{'R'}],
+    \EFs{"Bishops"}: [\EFs{'b'}, \EFs{'B'}],
+    \EFs{"Knights"}: [\EFs{'n'}, \EFs{'N'}],
+    \EFs{"Pawns"}: [\EFs{'p'}, \EFs{'P'}]
+\}
+\end{Verbatim}
+\end{Code}
+\end{document}
