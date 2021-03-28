@@ -1,0 +1,85 @@
+#+TITLE: Chess piece position analysis
+#+OPTIONS: toc:nil
+#+LATEX_HEADER: \usepackage[top=1in, bottom=1.25in, left=1.25in, right=1.25in]{geometry}
+
+* What?
+This project aims to visualise a relationship between the positions of various
+pieces and the players skill level. The positions of pieces, in states such as
+captured, capturing, or checking, can be easily represented using an ~8x8~ heat
+map. I also plan to present accompanying statistics utilising multi plots and
+histograms of events through out a game.
+
+A key plot I aim to produce is a multi plot with ranking on x-axis and piece
+type on the y-axis. An example of this type of plot can be found [[https://seaborn.pydata.org/_images/axis_grids_18_0.png][here in the seaborn documentation]].
+
+* Why?
+The purpose of this project is to show the positional differences between
+different levels of play and over time. This is something not often visualised
+within the community thus I thought it would be a unique take on some common
+statistic.
+
+* How?
+Throughout this project I have been utilising a number of libraries such as
+=numpy=, =matplotlib=, and =pandas= for general computation. Additionally I use
+the [[https://github.com/niklasf/python-chess][python-chess]] library to parse and interface with games on higher level.
+
+For more general statistics I will adapt a ~Chess.com~ parsing script found
+[[https://public.tableau.com/views/MyChessJourney-Visualized/MyChessJourney?:language=en&:display_count=y&publish=yes&:origin=viz_share_link&:showVizHome=no][here]]. An example of this script in action can be seen [[https://public.tableau.com/views/MyChessJourney-Visualized/MyChessJourney?:language=en&:display_count=y&publish=yes&:origin=viz_share_link&:showVizHome=no][here]].
+
+* Data source?
+Chess games are found freely on the internet from many archives such as [[https://www.pgnmentor.com/files.html][PGN
+Mentor]]. From here I am able to download thousands of games at mass. However as
+most games preserved will of famous players there will be significant bias. To
+help mitigate this I can use the public API's from [[https://lichess.org/][Lichess]] and [[https://www.chess.com/][Chess.com]] to
+gather games from friends and players from various ELO's.
+
+To pull games from Chess.com I use this shell command to gather the PGN files
+from individual months and write them to a single file as Chess.com does not
+support downloading of all games at once.
+#+begin_src bash :exports code
+for g in $(curl -Ls https://api.chess.com/pub/player/$PLAYERNAME/games/archives | jq -rc ".archives[]") ; do curl -Ls "$g" | jq -rc ".games[].pgn" ; done >> games.pgn
+#+end_src
+
+#+RESULTS:
+
+Lichess easily allows for downloading of an entire players archive at once with
+a simple =curl=.
+#+begin_src bash :exports code
+curl https://lichess.org/games/export/$PLAYERNAME > games.pgn
+#+end_src
+
+#+RESULTS:
+
+* Examples
+#+srcname: Libaries
+#+begin_src python :results none :exports both :tangle example.py :session chess
+import chess
+import chess.pgn
+import chessHeatmap
+#+end_src
+
+#+srcname: Example Pawn
+#+begin_src python :results file :exports both :tangle example.py :session chess
+pgn = chessHeatmap.load_pgn("Dae.pgn")
+
+filename_pawn = chessHeatmap.lost_piece_plot(pgn, [chess.PAWN])
+filename_pawn
+#+end_src
+
+#+CAPTION: Pawns lost from whites POV
+#+RESULTS: Example Pawn
+[[file:DaenaliaEvandruile_Lost_piece_plot__pawn.png]]
+
+\newpage
+
+#+srcname: Example Knight
+#+begin_src python :results file :exports both :tangle example.py :session chess
+filename_knight = chessHeatmap.lost_piece_plot(pgn, [chess.KNIGHT])
+filename_knight
+#+end_src
+
+#+CAPTION: Knights lost from whites POV
+#+RESULTS: Example Knight
+[[file:DaenaliaEvandruile_Lost_piece_plot__knight.png]]
+
+#  LocalWords:  ELO

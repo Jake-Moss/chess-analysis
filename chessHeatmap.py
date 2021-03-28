@@ -31,12 +31,16 @@ def load_pgn(filename: str) -> List[chess.pgn.Game]:
         return games
 
 
-def single_player(games: List[chess.pgn.Game]) -> Tuple[List[chess.pgn.Game], List[chess.pgn.Game]]:
+def single_player(games: List[chess.pgn.Game], username = '') -> Tuple[List[chess.pgn.Game], List[chess.pgn.Game], str]:
     print(games[0].headers["White"])
     print(games[0].headers["Black"])
-    username = input("Username to analyse: ")
-    # username = "kev4chess"
-    # username = "DaenaliaEvandruile"
+
+    if not username:
+        names = []
+        for game in games:
+            names.extend([game.headers["White"], game.headers["Black"]])
+        username = max(set(names), key = names.count)
+        print("Guessed player is", username)
 
     white_games = []
     black_games = []
@@ -48,7 +52,7 @@ def single_player(games: List[chess.pgn.Game]) -> Tuple[List[chess.pgn.Game], Li
             black_games.append(game)
         else:
             raise ValueError("Player name did not play in game " + str(len(white_games) + len(black_games)))
-    return white_games, black_games
+    return white_games, black_games, username
 
 
 def progress_game(game: chess.pgn.Game, number_of_moves: int = 0):
@@ -105,7 +109,7 @@ def piece_delta(board: chess.Board, count: int, piece_count: Dict[int, int], col
             piece_count[key] = current_count # Modify by object-reference
         elif current_count > value: # Accounts for promotion
             piece_count[key] = current_count # Modify by object-reference
-    return piece_position
+    return piece_position # piece id, position, count
 
 
 def frequecny_match_pattern(frequency: List[int], patterns: List[int], lost: List[Tuple[int, int, int]]):
@@ -118,58 +122,110 @@ def frequecny_match_pattern(frequency: List[int], patterns: List[int], lost: Lis
             # print(np.reshape(frequency, (8,8)))
 
 
-def naive_frequency(board: chess.Board, pieces: List[str], frequency: List[List[int]]):
-    boardstr = str(board)
-    boardstr = boardstr.splitlines(False)
-    for y in range(8):
-        for x in range(8):
-            # print(boardstr[y][2*x])
-            if boardstr[y][2*x] in pieces:
-                frequency[y][x] += 1
 
 
 
 
+def lost_piece_heat(ax: np.ndarray, games: List[chess.pgn.Game], colour: bool,  patterns: List[int], number_of_moves: int = 0):
 
+    frequency = gen_frequency()
 
-
-
-
-def lost_piece_plot(pgn: List[chess.pgn.Game], patterns: List[int]):
-    white_games, black_games  = single_player(pgn)
-
-    fig, axs = plt.subplots(ncols=2)
-
-    frequency_black = gen_frequency()
-    frequency_white = gen_frequency()
-
-    for game in white_games:
-        lost_pieces_white = game_capture(game, chess.WHITE)
-        frequecny_match_pattern(frequency_white, patterns, lost_pieces_white)
-
-    for game in black_games:
-        lost_pieces_black = game_capture(game, chess.BLACK)
-        frequecny_match_pattern(frequency_black, patterns, lost_pieces_black)
+    for game in games:
+        lost_pieces = game_capture(game, colour, number_of_moves)
+        for piece in lost_pieces:
+            if piece[0] in patterns:
+                x = piece[1]
+                frequency[x] += 1
 
     cmap = sns.diverging_palette(230, 20, as_cmap=True)
-    frequencies = [frequency_white, frequency_black]
+
+    sns.heatmap(
+        np.reshape(frequency, (8,8)),
+        ax=ax,
+        cmap=cmap,
+        xticklabels=list(ascii_letters[:8]),
+        yticklabels=range(8,0,-1),
+        square=True
+    )
 
 
-    for x in range(2):
-        sns.heatmap(
-            np.reshape(frequencies[x], (8,8)),
-            ax=axs[x],
-            cmap=cmap,
-            xticklabels=list(ascii_letters[:8]),
-            yticklabels=range(8,0,-1),
-            square=True,
-            # annot=True
-        ).set_title("Black" if x else "White")
+def lost_piece_hist(ax: np.ndarray, games: List[chess.pgn.Game], colour: bool,  patterns: List[int], number_of_moves: int = 0):
 
-pgn = load_pgn("dad.pgn")
-# single_player_plot(pgn)
+    # pal = sns.cubehelix_palette(10, rot=-.25, light=.7)
+    # g = sns.FacetGrid(aspect=15, height=.5, palette=pal)
+    # moves_pieces_lost_on = [None]
+    #
 
-# split_pattern_plot(pgn, [""])
-# sns.displot(STATS["Queen lost"])
-lost_piece_plot(pgn, [chess.PAWN])
-plt.show(block=False)
+
+    total_count = []
+    for game in games:
+        lost_pieces = game_capture(game, colour, number_of_moves)
+        for piece in lost_pieces:
+            if piece[0] in patterns:
+                total_count.append(piece[2])
+
+    sns.kdeplot(data=total_count, ax=ax, fill=True, alpha=0.5, linewidth=1.5)
+
+def main():
+    pgn = load_pgn("Dae.pgn")
+
+    white_games, black_games, username  = single_player(pgn)
+    grid = (5,5)
+    fig, axs = plt.subplots(grid[0], grid[1])
+
+    # lost_piece_heat(axs[0], white_games, chess.WHITE, [chess.PAWN])
+    # axs[0].set_title("White")
+
+    x = 0
+    for piece in chess.PIECE_TYPES[:5]:
+        for y in range(grid[1]):
+            lost_piece_hist(axs[x][y], white_games, chess.WHITE, [piece])
+            if (not x == grid[1] - 1 ) and (not y == 0):
+                axs[x][y].tick_params(
+                    axis='both',
+                    labelbottom=False,
+                    labelleft=False
+                )
+                axs[x][y].yaxis.label.set_visible(False)
+            if (x == grid[1] - 1 ):
+                axs[x][y].tick_params(
+                    axis='y',
+                    labelbottom=True,
+                    labelleft=False
+                )
+                axs[x][y].yaxis.label.set_visible(False)
+            if (y == 0):
+                axs[x][y].tick_params(
+                    axis='x',
+                    labelbottom=False,
+                    labelleft=True
+                )
+                axs[x][y].yaxis.label.set_visible(True)
+            if (x == grid[1] - 1 ) and (y == 0):
+                axs[x][y].tick_params(
+                    axis='both',
+                    labelbottom=True,
+                    labelleft=True
+                )
+                axs[x][y].yaxis.label.set_visible(True)
+            axs[x][y].set_ylabel(chess.PIECE_NAMES[piece].capitalize())
+        x += 1
+    # lost_piece_heat(axs[1], black_games, chess.BLACK, [chess.PAWN])
+    # axs[1].set_title("Black")
+
+    # fig.suptitle("Positions of " + chess.PIECE_NAMES[chess.PAWN] + " when lost from whites POV")
+    # fig.savefig("Lost piece plot pawns")
+    fig.show()
+
+    # fig, axs = plt.subplots(1, 2)
+    # lost_piece_plot(axs[0], white_games, chess.WHITE, [chess.KNIGHT])
+    # lost_piece_plot(axs[1], black_games, chess.BLACK, [chess.KNIGHT])
+    # fig.show()
+
+    # filename = "testing.png"
+
+    # fig.savefig(filename)
+    fig.show()
+
+if __name__ == "__main__":
+    main()
