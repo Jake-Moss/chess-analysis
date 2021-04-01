@@ -10,16 +10,36 @@ from typing import List, Tuple, Dict
 
 
 def gen_frequency() -> List[int]:
+    """
+    Generates 1x64 (8x8) freq array filled with 0
+    Index via 1d array notation
+
+    [0,0,...]
+    """
     return [0 for _ in range(64)]
 
 
-def uci_to_grid(uci: str) -> int:
+def uci_to_1d_array_index(uci: str) -> int:
+    """"
+    Converts uci notation to 1d array indexing.
+
+      a b c
+     ------
+    8|1 2 3   -->  [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    7|4 5 6
+    6|7 8 9
+
+    Also attempts to account for en pasenant
+    """
     if len(uci) == 5:
         uci = uci[:-1]
     return abs(int(uci[-1]) - 8)*8 + (ord(uci[-2]) - ord('a'))
 
 
 def load_pgn(filename: str) -> List[chess.pgn.Game]:
+    """
+    Read pgn into list, breaks after hitting EOF
+    """
     with open(filename) as pgn:
         games =[]
         while True:
@@ -32,6 +52,13 @@ def load_pgn(filename: str) -> List[chess.pgn.Game]:
 
 
 def single_player(games: List[chess.pgn.Game], username = '') -> Tuple[List[chess.pgn.Game], List[chess.pgn.Game], str]:
+    """
+    Splits list of games into black and white games based on the POV of the selected player.
+
+    Attempts to guess the player based on most freq name unless given a username.
+
+    Rasies value error if the player did not play in a particular game.
+    """
     print(games[0].headers["White"])
     print(games[0].headers["Black"])
 
@@ -56,6 +83,9 @@ def single_player(games: List[chess.pgn.Game], username = '') -> Tuple[List[ches
 
 
 def progress_game(game: chess.pgn.Game, number_of_moves: int = 0):
+    """
+    Advance game to end state
+    """
     count = 0
     board = game.board()
     for move in game.mainline_moves():
@@ -66,6 +96,11 @@ def progress_game(game: chess.pgn.Game, number_of_moves: int = 0):
 
 
 def game_capture(game: chess.pgn.Game, colour: bool, number_of_moves: int = 0) -> List[Tuple[int, int, int]]:
+    """
+    Steps through game and checks if a piece has been lost via piece_delta
+
+    Can hanldle en passant :pog:
+    """
     count = 0
     lost = []
     board = game.board()
@@ -82,10 +117,10 @@ def game_capture(game: chess.pgn.Game, colour: bool, number_of_moves: int = 0) -
                 if not board.is_en_passant(move): # is it not en passant, the norm
                     board.push(move)
                     piece = piece_delta(board, count, piece_count, board.turn)
-                    lost.append(piece)
                 else: # needs seperate code path
+                    piece = (1, uci_to_1d_array_index(move.uci()), count)
                     board.push(move)
-                    print("en passant hit", colour)
+                lost.append(piece)
 
             else:
                 board.push(move)
@@ -100,11 +135,21 @@ def game_capture(game: chess.pgn.Game, colour: bool, number_of_moves: int = 0) -
 
 
 def piece_delta(board: chess.Board, count: int, piece_count: Dict[int, int], colour: bool) -> Tuple[int, int, int]:
+    """
+    Returns a tuple of the key (int piece code), restult from uci_to_1d_array_index, and move the piece
+    was lost on.
+
+    Detects when a piece is lost by counting the number of ones on the piece board mask and tracking
+    the previous value.
+
+    Would be really nice if the deves merged this :|
+    https://github.com/niklasf/python-chess/pull/296/commits/498dd015cbffffb57bc7ef2a6d097fb6d9340eed
+    """
     piece_position = (0, 0, 0)
     for key, value in piece_count.items():
         current_count = bin(board.pieces_mask(key, colour)).count('1')
         if current_count < value: # Detects lost based on previous state
-            piece_position = (key, uci_to_grid(board.peek().uci()), count)
+            piece_position = (key, uci_to_1d_array_index(board.peek().uci()), count)
             # print(board.peek().uci())
             piece_count[key] = current_count # Modify by object-reference
         elif current_count > value: # Accounts for promotion
@@ -125,8 +170,10 @@ def frequecny_match_pattern(frequency: List[int], patterns: List[int], lost: Lis
 
 
 
-
 def lost_piece_heat(ax: np.ndarray, games: List[chess.pgn.Game], colour: bool,  patterns: List[int], number_of_moves: int = 0):
+    """
+    Plots a heat 8x8 heat map of where a pattern of pieces where lost.
+    """
 
     frequency = gen_frequency()
 
@@ -139,24 +186,26 @@ def lost_piece_heat(ax: np.ndarray, games: List[chess.pgn.Game], colour: bool,  
 
     cmap = sns.diverging_palette(230, 20, as_cmap=True)
 
+    print(frequency)
     sns.heatmap(
         np.reshape(frequency, (8,8)),
         ax=ax,
         cmap=cmap,
         xticklabels=list(ascii_letters[:8]),
         yticklabels=range(8,0,-1),
-        square=True
+        square=True,
+        cbar=False
     )
 
 
-def lost_piece_hist(ax: np.ndarray, games: List[chess.pgn.Game], colour: bool,  patterns: List[int], number_of_moves: int = 0):
+def lost_piece_hist(ax: np.ndarray, games: List[chess.pgn.Game], colour: bool, \
+                    patterns: List[int], number_of_moves: int = 0):
+    """
+    Plots a kernel density plot of what move number the particular piece was
+    lost on.
 
-    # pal = sns.cubehelix_palette(10, rot=-.25, light=.7)
-    # g = sns.FacetGrid(aspect=15, height=.5, palette=pal)
-    # moves_pieces_lost_on = [None]
-    #
-
-
+    piece is int rather than string as python-chess uses int in backed.
+    """
     total_count = []
     for game in games:
         lost_pieces = game_capture(game, colour, number_of_moves)
@@ -166,61 +215,85 @@ def lost_piece_hist(ax: np.ndarray, games: List[chess.pgn.Game], colour: bool,  
 
     sns.kdeplot(data=total_count, ax=ax, fill=True, alpha=0.5, linewidth=1.5)
 
+
+def subplot_matrix_format(axs: np.ndarray, grid: Tuple[int, int]):
+    """
+    Formats the sub plots grid provided such that the axis labels are only
+    on the left and bottom plots. Assumes full NxM grid of subplots.
+    """
+    #axs is np.ndarry[np.ndarry[plt.Axes]] but type hints wont work for some reason?
+    if np.size(axs) == max(grid):
+        axs = np.reshape(axs, grid)
+
+    for row in range(grid[0]):
+        piece = chess.PIECE_TYPES[row]
+        for col in range(grid[1]):
+            if (not row == grid[0] - 1 ) and (not col == 0):
+                axs[row][col].tick_params(
+                    axis='both',
+                    labelbottom=False,
+                    labelleft=False
+                )
+                axs[row][col].yaxis.label.set_visible(False)
+            if (row == grid[0] - 1):
+                axs[row][col].tick_params(
+                    axis='both',
+                    labelbottom=True,
+                    labelleft=False
+                )
+                axs[row][col].yaxis.label.set_visible(False)
+            if (col == 0):
+                axs[row][col].tick_params(
+                    axis='both',
+                    labelbottom=False,
+                    labelleft=True
+                )
+                axs[row][col].yaxis.label.set_visible(True)
+            if (row == grid[0] - 1) and (col == 0):
+                axs[row][col].tick_params(
+                    axis='both',
+                    labelbottom=True,
+                    labelleft=True
+                )
+                axs[row][col].yaxis.label.set_visible(True)
+            axs[row][col].set_ylabel(chess.PIECE_NAMES[piece].capitalize())
+
+
 def main():
-    pgn = load_pgn("Dae.pgn")
+    pgn = load_pgn("pgn/Dae.pgn")
 
     white_games, black_games, username  = single_player(pgn)
-    grid = (5,5)
+    grid = (5,2)
     fig, axs = plt.subplots(grid[0], grid[1])
 
-    # lost_piece_heat(axs[0], white_games, chess.WHITE, [chess.PAWN])
-    # axs[0].set_title("White")
+    games = [white_games,black_games]
+    # games = [white_games, black_games, white_games, black_games, white_games]
 
-    x = 0
-    for piece in chess.PIECE_TYPES[:5]:
-        for y in range(grid[1]):
-            lost_piece_hist(axs[x][y], white_games, chess.WHITE, [piece])
-            if (not x == grid[1] - 1 ) and (not y == 0):
-                axs[x][y].tick_params(
-                    axis='both',
-                    labelbottom=False,
-                    labelleft=False
-                )
-                axs[x][y].yaxis.label.set_visible(False)
-            if (x == grid[1] - 1 ):
-                axs[x][y].tick_params(
-                    axis='y',
-                    labelbottom=True,
-                    labelleft=False
-                )
-                axs[x][y].yaxis.label.set_visible(False)
-            if (y == 0):
-                axs[x][y].tick_params(
-                    axis='x',
-                    labelbottom=False,
-                    labelleft=True
-                )
-                axs[x][y].yaxis.label.set_visible(True)
-            if (x == grid[1] - 1 ) and (y == 0):
-                axs[x][y].tick_params(
-                    axis='both',
-                    labelbottom=True,
-                    labelleft=True
-                )
-                axs[x][y].yaxis.label.set_visible(True)
-            axs[x][y].set_ylabel(chess.PIECE_NAMES[piece].capitalize())
-        x += 1
-    # lost_piece_heat(axs[1], black_games, chess.BLACK, [chess.PAWN])
+    subplot_matrix_format(axs, grid)
+
+
+    # # kde plot for feq thing
+    # for row in range(grid[0]):
+    #     piece = chess.PIECE_TYPES[row]
+    #     for col in range(grid[1]):
+    #         lost_piece_hist(axs[row][col], games[col], chess.WHITE, [piece]) # plotting happens here
+
+
+    # Normal heat plot thing
+    # lost_piece_heat(axs[0], white_games, chess.WHITE, [chess.KNIGHT])
+    # lost_piece_heat(axs[1], black_games, chess.BLACK, [chess.KNIGHT])
+    # axs[0].set_title("White")
     # axs[1].set_title("Black")
 
     # fig.suptitle("Positions of " + chess.PIECE_NAMES[chess.PAWN] + " when lost from whites POV")
     # fig.savefig("Lost piece plot pawns")
-    fig.show()
 
-    # fig, axs = plt.subplots(1, 2)
-    # lost_piece_plot(axs[0], white_games, chess.WHITE, [chess.KNIGHT])
-    # lost_piece_plot(axs[1], black_games, chess.BLACK, [chess.KNIGHT])
-    # fig.show()
+    # heat plot on matrix plot thingo below
+    for row in range(grid[0]):
+        piece = chess.PIECE_TYPES[row]
+        for col in range(grid[1]):
+            # lost_piece_hist(axs[row][col], games[col], chess.WHITE, [piece]) # plotting happens here
+            lost_piece_heat(axs[row][col], games[col], chess.WHITE, [piece])
 
     # filename = "testing.png"
 
