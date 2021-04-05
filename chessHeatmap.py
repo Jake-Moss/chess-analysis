@@ -51,6 +51,7 @@ def load_pgn(filename: str) -> List[chess.pgn.Game]:
         return games
 
 
+# reimplement using dataframe
 def single_player(games: List[chess.pgn.Game], username = '') -> Tuple[List[chess.pgn.Game], List[chess.pgn.Game], str]:
     """
     Splits list of games into black and white games based on the POV of the selected player.
@@ -232,28 +233,36 @@ def subplot_matrix_format(axs: np.ndarray, grid: Tuple[int, int]):
                 axs[row][col].tick_params(
                     axis='both',
                     labelbottom=False,
-                    labelleft=False
+                    bottom=False,
+                    labelleft=False,
+                    left=False,
                 )
                 axs[row][col].yaxis.label.set_visible(False)
             if (row == grid[0] - 1):
                 axs[row][col].tick_params(
                     axis='both',
                     labelbottom=True,
-                    labelleft=False
+                    bottom=True,
+                    labelleft=False,
+                    left=False,
                 )
                 axs[row][col].yaxis.label.set_visible(False)
             if (col == 0):
                 axs[row][col].tick_params(
                     axis='both',
                     labelbottom=False,
-                    labelleft=True
+                    bottom=False,
+                    labelleft=True,
+                    left=True,
                 )
                 axs[row][col].yaxis.label.set_visible(True)
             if (row == grid[0] - 1) and (col == 0):
                 axs[row][col].tick_params(
                     axis='both',
                     labelbottom=True,
-                    labelleft=True
+                    bottom=True,
+                    labelleft=True,
+                    left=True,
                 )
                 axs[row][col].yaxis.label.set_visible(True)
             axs[row][col].set_ylabel(chess.PIECE_NAMES[piece].capitalize())
@@ -292,7 +301,7 @@ def main():
     for row in range(grid[0]):
         piece = chess.PIECE_TYPES[row]
         for col in range(grid[1]):
-            # lost_piece_hist(axs[row][col], games[col], chess.WHITE, [piece]) # plotting happens here
+            lost_piece_hist(axs[row][col], games[col], chess.WHITE, [piece]) # plotting happens here
             lost_piece_heat(axs[row][col], games[col], chess.WHITE, [piece])
 
     # filename = "testing.png"

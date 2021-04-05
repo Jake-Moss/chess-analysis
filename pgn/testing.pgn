@@ -4,14 +4,7 @@
 [Black "kev4chess"]
 [White "michaelbhansen"]
 [Result "0-1"]
-[UTCDate "2021.02.26"]
-[UTCTime "06:42:33"]
-[WhiteElo "1500"]
-[BlackElo "1500"]
-[Variant "Standard"]
-[TimeControl "900+8"]
-[ECO "A00"]
-[Termination "Normal"]
+[Testing "oh no"]
 
 1. e4 e6 2. e5 d5 3. exd6e.p.
 

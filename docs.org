@@ -1,0 +1,13 @@
+* Data frame structure
+|     | SAN string             | Black player | White player | Winner | Elo Black | Elo White | Date  | other |
+|-----+------------------------+--------------+--------------+--------+-----------+-----------+-------+-------|
+|   1 | String in SAN notation | string       | string       | string | int       | int       | date? | ...   |
+|   2 |                        |              |              |        |           |           |       |       |
+| ... |                        |              |              |        |           |           |       |       |
+
+* Ideas:
+ - NAGs, heat map histogram of various blunders/brilliant moves
+
+* Problems:
+ - Headers aren't standard, they aren't ordered either (sites may be consistent with them selves)
+   but cant trust them. Manually pulling will error if there isnt a particular entry
