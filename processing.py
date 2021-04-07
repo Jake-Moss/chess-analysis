@@ -52,15 +52,19 @@ def piece_delta(board: chess.Board, count: int, piece_count: Dict[int, int],
     return piece_position # piece id, position, count
 
 
-def get_captures(board: chess.Board, move: chess.Move, count: int, piece_count: Dict[int, int]) -> Tuple[int, int, int]:
-    if not board.is_en_passant(move): # is it not en passant, the norm
+def get_captures(board: chess.Board, prev_moce: chess.Move, count: int, piece_count: Dict[int, int]) \
+                -> Tuple[int, int, int]:
+
+    if not board.is_en_passant(prev_moce): # is it not en passant, the norm
         piece = piece_delta(board, count, piece_count, board.turn)
     else: # needs seperate code path
-        piece = (1, uci_to_1d_array_index(move.uci()), count)
+        piece = (1, uci_to_1d_array_index(prev_moce.uci()), count)
     return piece
 
 
-def process_game(game: chess.pgn.Game, number_of_moves: int = 0) -> Tuple[List[Tuple[int, int, int]], List[Tuple[int, int, int]]]:
+def process_game(game: chess.pgn.Game, number_of_moves: int = 0) \
+                -> Tuple[List[Tuple[int, int, int]], List[Tuple[int, int, int]]]:
+
     board = game.board()
     piece_count = (
         # chess.BLACK
@@ -80,7 +84,8 @@ def process_game(game: chess.pgn.Game, number_of_moves: int = 0) -> Tuple[List[T
             chess.QUEEN: 1
         }
  )
-    lost_pieces = ([], [])
+    lost_pieces = ([], # chess.BLACK
+                   []) # chess.WHITE
 
     for move in game.mainline_moves():
         count = len(board.move_stack)
@@ -96,3 +101,6 @@ def process_game(game: chess.pgn.Game, number_of_moves: int = 0) -> Tuple[List[T
             break
 
     return lost_pieces
+
+def in_range(lower: int, df, upper: int):
+    return df[df > lower] & df[df <= upper]

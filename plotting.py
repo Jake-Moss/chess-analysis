@@ -19,19 +19,44 @@ def gen_frequency() -> List[int]:
     return [0 for _ in range(64)]
 
 
-def lost_piece_heat(df: pd.DataFrame, colour: bool, patterns: List[int] = list(chess.PIECE_TYPES), number_of_moves: int = 0) \
-                    -> np.ndarray:
+def lost_piece_heat_single_user(df: pd.DataFrame, username: str, colour: bool, patterns: List[int] = list(chess.PIECE_TYPES), number_of_moves: int = 0) \
+                                -> np.ndarray:
     """
     Iterates over all rows in data frame supplied. Condition it before passing.
 
     piece is int rather than string as python-chess uses int in backed.
     """
+
+    colour_played = (df["White"] == username).to_numpy() # zip colour played and df["Lost pieces"].to_numpy
+    # to get the colour played on each game with the pieces lost of that colour.
+    frequency = gen_frequency()
+
+    for lost_pieces, colour_in_game in zip(df["Lost pieces"].to_numpy(), colour_played):
+        if colour_in_game == colour:
+            for piece in lost_pieces[colour]:
+                if piece[0] in patterns:
+                    frequency[piece[1]] += 1
+
+    return np.reshape(frequency, (8, 8))
+
+
+def lost_piece_heat(df: pd.DataFrame, colour: bool, patterns: List[int] = list(chess.PIECE_TYPES), number_of_moves: int = 0) \
+                                -> np.ndarray:
+    """
+    Iterates over all rows in data frame supplied. Condition it before passing.
+
+    piece is int rather than string as python-chess uses int in backed.
+
+    Modifies board such that black and whites pov's are the same
+    """
+
     frequency = gen_frequency()
 
     for lost_pieces in df["Lost pieces"].to_numpy():
         for piece in lost_pieces[colour]:
-            if piece[0] in patterns:
-                frequency[piece[1]] += 1
+           if piece[0] in patterns:
+               frequency[piece[1]] += 1
+
 
     return np.reshape(frequency, (8, 8))
 
@@ -59,7 +84,8 @@ def subplot_matrix_format(axs: np.ndarray, grid: Tuple[int, int], pieces_labels:
     on the left and bottom plots. Assumes full NxM grid of subplots.
     """
     #axs is np.ndarry[np.ndarry[plt.Axes]] but type hints wont work for some reason?
-    if np.size(axs) == max(grid):
+
+    if np.size(axs) == max(grid): # Make types consistent ffs
         axs = np.reshape(axs, grid)
 
     for row in range(grid[0]):
@@ -74,6 +100,7 @@ def subplot_matrix_format(axs: np.ndarray, grid: Tuple[int, int], pieces_labels:
                     bottom=False,
                     labelleft=False,
                     left=False,
+                    labelrotation=0
                 )
                 axs[row][col].xaxis.label.set_visible(False)
                 axs[row][col].yaxis.label.set_visible(False)
@@ -84,6 +111,7 @@ def subplot_matrix_format(axs: np.ndarray, grid: Tuple[int, int], pieces_labels:
                     bottom=True,
                     labelleft=False,
                     left=False,
+                    labelrotation=0
                 )
                 axs[row][col].xaxis.label.set_visible(True)
                 axs[row][col].yaxis.label.set_visible(False)
@@ -94,6 +122,7 @@ def subplot_matrix_format(axs: np.ndarray, grid: Tuple[int, int], pieces_labels:
                     bottom=False,
                     labelleft=True,
                     left=True,
+                    labelrotation=0
                 )
                 axs[row][col].xaxis.label.set_visible(False)
                 axs[row][col].yaxis.label.set_visible(True)
@@ -104,6 +133,7 @@ def subplot_matrix_format(axs: np.ndarray, grid: Tuple[int, int], pieces_labels:
                     bottom=True,
                     labelleft=True,
                     left=True,
+                    labelrotation=0
                 )
                 axs[row][col].xaxis.label.set_visible(True)
                 axs[row][col].yaxis.label.set_visible(True)
@@ -115,11 +145,14 @@ def normalise(data: np.ndarray) -> Tuple[np.ndarray, float]:
     return normalised, np.max(normalised)
 
 
-def plot_heatmap_grid(dfs: List[pd.DataFrame], pieces: List[int], \
-                      cmap = sns.diverging_palette(230, 20, as_cmap=True)) \
-                      -> Tuple[plt.Figure, plt.Axes]:
+def plot_heatmap_grid(dfs: List[pd.DataFrame], pieces: List[int], col_labels: List[str], colour: bool, \
+                      username: str = "", cmap = sns.diverging_palette(230, 20, as_cmap=True)) \
+                      -> Tuple[plt.Figure, np.ndarray]:
 
-    """Plots a grid of heat maps. Data MUST be preconditioned."""
+    """
+    Plots a grid of heat maps. Data MUST be preconditioned.
+    axs is np.ndarry[np.ndarry[plt.Axes]] but type hints wont work for some reason?
+    """
 
 
     grid = (len(pieces), len(dfs))
@@ -129,7 +162,14 @@ def plot_heatmap_grid(dfs: List[pd.DataFrame], pieces: List[int], \
     for row in range(grid[0]):
         piece = pieces[row]
         for col in range(grid[1]):
-            freq, local_max = normalise(lost_piece_heat(dfs[col], chess.BLACK, [piece]))
+            if username: # non-empty evals to true
+                freq, local_max = normalise(
+                    lost_piece_heat_single_user(dfs[col], username, colour, [piece])
+                )
+            else:
+                freq, local_max = normalise(
+                    lost_piece_heat(dfs[col], colour, [piece])
+                )
             local_maxs.append(local_max)
             normalised[row].append(freq)
 
@@ -137,19 +177,21 @@ def plot_heatmap_grid(dfs: List[pd.DataFrame], pieces: List[int], \
 
     fig, axs = plt.subplots(nrows = grid[0], ncols = grid[1])
 
+    if np.size(axs) == max(grid): # Make types consistence smh matplotlib
+        axs = np.reshape(axs, grid)
+
     fig.subplots_adjust(right=0.8)
 
     cbar_ax = fig.add_axes([0.85, 0.15, 0.03, 0.7])
 
     for row in range(grid[0]):
         for col in range(grid[1]):
-            ax = axs[row][col]
             sns.heatmap(
-                normalised[row][col],
+                data=normalised[row][col],
                 vmin=0,
                 vmax=global_max,
                 cbar=True,
-                ax=ax,
+                ax=axs[row][col],
                 cmap=cmap,
                 square=True,
                 cbar_ax=cbar_ax,
@@ -157,5 +199,56 @@ def plot_heatmap_grid(dfs: List[pd.DataFrame], pieces: List[int], \
                 yticklabels=range(8,0,-1),
             )
 
-    subplot_matrix_format(axs, grid, [chess.PIECE_NAMES[x].capitalize() for x in pieces], ["a", "b", "df", "sdfs", "eesfs", "testing", "long"])
+    subplot_matrix_format(axs, grid, [chess.PIECE_NAMES[x].capitalize() for x in pieces], col_labels)
+    return fig, axs
+
+
+def plot_heatmap_single_piece(df: pd.DataFrame, pieces: List[int], username: str = "", \
+                              cmap = sns.diverging_palette(230, 20, as_cmap=True)) \
+                              -> Tuple[plt.Figure, np.ndarray]:
+
+    col_labels = ["Black", "White"]
+    local_maxs = []
+    normalised = [
+         # chess.BLACK
+         # chess.WHITE
+    ]
+    for colour in [chess.BLACK, chess.WHITE]:
+        if username: # non-empty evals to true
+            freq, local_max = normalise(
+                lost_piece_heat_single_user(df, username, colour, pieces)
+            )
+        else:
+            freq, local_max = normalise(
+                lost_piece_heat(df, colour, pieces)
+            )
+        local_maxs.append(local_max)
+        normalised.append(freq)
+
+    global_max = max(local_maxs)
+
+    fig, axs = plt.subplots(nrows = 1, ncols = 2)
+
+    axs = np.reshape(axs, (1, 2))
+
+    fig.subplots_adjust(right=0.8)
+
+    cbar_ax = fig.add_axes([0.85, 0.15, 0.03, 0.7])
+
+    print(axs)
+    for colour in [int(chess.BLACK), int(chess.WHITE)]: # see below for reason of werid cast
+        sns.heatmap(
+            data=normalised[colour],
+            vmin=0,
+            vmax=global_max,
+            cbar=True,
+            ax=axs[0][colour], # numpy arrays cannot be index by bools like normal arrays this took way to long to figure out. Normal arrays can cause the bools are duck typed to ints but not numpy arrays the special bastards
+            cmap=cmap,
+            square=True,
+            cbar_ax=cbar_ax,
+            xticklabels=list(ascii_letters[:8]),
+            yticklabels=range(8,0,-1),
+        )
+
+    subplot_matrix_format(np.reshape(axs, (1, 2)), (1, 2), [chess.PIECE_NAMES[piece].capitalize() for piece in pieces], col_labels)
     return fig, axs
