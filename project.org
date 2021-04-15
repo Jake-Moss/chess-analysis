@@ -1,0 +1,22 @@
+#+TITLE: Project
+#+author: Jake Moss - s46409665
+
+* Introduction
+
+* Obtaining data
+** Sources
+** Methods
+** Formats
+* Data Processing
+** Tools used
+** Meta Data Extraction
+** Extracting Implicit Data
+** Data storage
+* Data Analysis
+** Local and Global Normalisation
+** Difficulties and bugs
+*** Pawn capture on 8th rank
+* Conclusion
+** Results
+* Reflection
+* References

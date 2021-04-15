@@ -69,19 +69,19 @@ def process_game(game: chess.pgn.Game, number_of_moves: int = 0) \
     piece_count = (
         # chess.BLACK
         {
-            chess.PAWN: 8,
-            chess.KNIGHT: 2,
+            chess.QUEEN: 1,
             chess.BISHOP: 2,
             chess.ROOK: 2,
-            chess.QUEEN: 1
+            chess.KNIGHT: 2,
+            chess.PAWN: 8,
         },
         # chess.WHITE
         {
-            chess.PAWN: 8,
-            chess.KNIGHT: 2,
+            chess.QUEEN: 1,
             chess.BISHOP: 2,
             chess.ROOK: 2,
-            chess.QUEEN: 1
+            chess.KNIGHT: 2,
+            chess.PAWN: 8,
         }
  )
     lost_pieces = ([], # chess.BLACK
