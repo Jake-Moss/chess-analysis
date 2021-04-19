@@ -1,22 +1,127 @@
 #+TITLE: Project
 #+author: Jake Moss - s46409665
+#+latex_header: \usepackage[top=1in, bottom=1.25in, left=1.25in, right=1.25in]{geometry}
+#+latex_header: \setlength{\parindent}{0pt}
 
 * Introduction
+** Project aims
+The goal of this project was to provide a new and somewhat unique visualisations of chess games. I plan to do this by plotting various positions of events such as
+ - [X] Captures
+ - [ ] Checks
+ - [ ] Checkmates
+In addition to these I plan to show when these events happen throughout games.
 
-* Obtaining data
-** Sources
-** Methods
-** Formats
+The purpose of this project is to show the positional differences between different levels of play and over time. This is something not often visualised within the community thus I thought it would be a unique take on some common statistic.
+** Obtaining data
+*** Sources
+Chess games are found freely on the internet from many archives such as [[https://www.pgnmentor.com/files.html][PGN Mentor]]. From here I am able to download thousands of games at mass using a FireFox extension. However as most preserved games are of tournaments and high skill players this data doesn't not sure what happens in common games. To help mitigate this I can use the public API's from [[https://lichess.org/][Lichess]] and [[https://www.chess.com/][Chess.com]] to gather games from friends and players from various ELO's.
+
+To pull games from Chess.com I use this bash command to gather the PGN files from individual months and write them to a single file as Chess.com does not support downloading of all games at once.
+#+begin_src bash :exports code :results none
+for g in $(curl -Ls https://api.chess.com/pub/player/$PLAYERNAME/games/archives | jq -rc ".archives[]") ; do curl -Ls "$g" | jq -rc ".games[].pgn" ; done >> games.pgn
+#+end_src
+
+Lichess easily allows for downloading of an entire players archive at once with
+a simple =curl=.
+#+begin_src bash :exports code :results none
+curl https://lichess.org/games/export/$PLAYERNAME > games.pgn
+#+end_src
+*** PGN Format
+The most common format used to store chess games is [[https://en.wikipedia.org/wiki/Portable_Game_Notation][Portable Game Notation]]. It is a human readable plain text notation which stores individual moves rather than the board states. While this is considerably more efficient for both storage and computation it makes extracting data that isn't explicitly given difficult and costly.
+
+The [[http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm][standard]] defines a required [[http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm#c8.1.1][seven tag roster]] and allows for optional tags such as =WhiteElo= and =BlackElo=. Each move is stored in [[https://en.wikipedia.org/wiki/Algebraic_notation_(chess)][Standard Algebraic Notation]], which describes the change in board state such as captures, checks, and promotions.
+
+SAN comes in a varsity of formats short, long, or minimal. Each variant encodes moves with different levels of detail. Unfortunately no single variant is used in all PGN databases, although it is rare for the format to change from within a database.
+
+A standard might look something like this
+#+begin_example
+[Event "WCh 2018"]
+[Site "London ENG"]
+[Date "2018.11.09"]
+[Round "1"]
+[White "Caruana, Fabiano"]
+[Black "Carlsen, Magnus"]
+[Result "1/2-1/2"]
+[WhiteTitle "GM"]
+[BlackTitle "GM"]
+[WhiteElo "2832"]
+[BlackElo "2835"]
+[ECO "B31"]
+[Opening "Sicilian"]
+[Variation "Nimzovich-Rossolimo attack (with ...g6, without ...d6)"]
+[WhiteFideId "2020009"]
+[BlackFideId "1503014"]
+[EventDate "2018.11.09"]
+
+1. e4 c5 2. Nf3 Nc6 3. Bb5 g6 ... 115. Ra8 1/2-1/2
+#+end_example
+Tags preface the game in ~[]~, often far more than required are provided. These tags are referred to as the headers. The moves themselves are listed in SAN with the result at the end.
+
+Due to the variation within each format and the format implicitly encoding data I wished to extract I chose not to write my own PGN parser and invalidator and instead to use an existing popular library, [[https://github.com/niklasf/python-chess][python-chess]].
+
+I would have preferred to use an alternative notation, =Reversible algebraic=, as it explicitly states the captured piece and its position within plain text. This would have allowed me to directly gather the data using regex without playing out each game.
+** Motivation
+As someone who does not play chess this is a strange choice of a project.
 * Data Processing
 ** Tools used
+In this project I make use of 4 libraries
+ - [[https://github.com/niklasf/python-chess][python-chess]]
+   Used to handle the complex move validation and PGN parsing required to step though games.
+ - [[https://matplotlib.org/][matplotlib]]
+   Standard plotting library.
+ - [[https://seaborn.pydata.org/][seaborn]]
+   A high level plotting library built on ~matplotlib~.
+ - [[https://numpy.org/][numpy]]
+   Standard scientific computing library. Within this project it is used to for its ~pandas~ optimisations, and reshape function.
+ - [[https://pandas.pydata.org/][pandas]]
+   Data frames provide an efficient way to store and conditionally select games based on metadata.
 ** Meta Data Extraction
+To extract the metadata from a game the PGN file is read using standard python methods and the game object is initialised using the ~aggerate~ function from the ~aggeration.py~ module. From the game object the headers are extracted into a dictionary and a data frame is created consisting of the headers are column titles and rows as individual games.
+
+|     | SAN string | Black | White | Result | BlackElo | WhiteElo | Date     | ... |
+|-----+------------+-------+-------+--------+----------+----------+----------+-----|
+|   1 | SAN string | name  | name  | string | int      | int      | DateTime | ... |
+| ... |            |       |       |        |          |          |          |     |
+
+
 ** Extracting Implicit Data
 ** Data storage
 * Data Analysis
 ** Local and Global Normalisation
 ** Difficulties and bugs
 *** Pawn capture on 8th rank
+You may have noticed some pawns are report to be captured on the 8th rank. This is not possible within a chess game and when pawns reach the 8th rank they are promoted, and a pawn cannot promote to another pawn.
+
+This bug occurs due to how I detect and handle captured pieces. While I do account for promotions there is a specific edge case that proved difficult to eliminate without a slower method.
+
+#+begin_src python :export code :results none
+def piece_delta(board: chess.Board, count: int, piece_count: Dict[int, int], \
+                colour: bool) -> Tuple[int, int, int]:
+    piece_position = (0, 0, 0)
+    for key, value in piece_count.items():
+        current_count = bin(board.pieces_mask(key, colour)).count('1')
+        # REQUIRES THE MOVE BE MADE (CAPTURE)
+        if current_count < value: # Detects lost based on previous state
+            piece_position = (key, uci_to_1d_array_index(board.peek().uci()), count)
+            piece_count[key] = current_count # Modify by object-reference
+        elif current_count > value: # Accounts for promotion
+            piece_count[key] = current_count # Modify by object-reference
+    return piece_position # piece id, position, count
+#+end_src
+This code block works by making mask of the current board state. This returns a boolean bitboard consisting only of the piece requested. This is then counted and used as the number of current pieces of the piece type present. As this method only keeps track of the number of pieces on the board at once and relies on the previous state to detect a capture it can be easily broken by a change in the piece count other than a capture.
+
+For example promotions. Promotions exchange a pawn in favour of another piece type. Although the increasing piece count is
+# NOT FINISHDED HERE
+*** Timezones and my ignorance of them
+As Tom Scott put it [[https://youtu.be/-5wpm-gesOY]["What you learn after dealing with time zones, is that what you do is put away from code and you don't try and write anything to deal with this. You look at the people who have been there before you. You look at the first people, the people who have dealt with this before, the people who have built the spagetti code, and you thank them very much for making it open source."]]. Rather than dealing with time zones myself I employed the ~pd.to_datetime()~ method to correctly handle dates. Although my use-case is not very complicated it is better to use code that I can trust.
+
+*** Storing game object in Data frame
+I ran into a lot of issues storing a game object within the same data frame as the metadata. The object would be cast to its string representation due to pandas seeing the rest of the data frame as strings. This string representation would just be the original PGN game making it very inefficient to have to prase the game again.
+
+To over come this I stored the game objects with a normal list and made sure to sync the index of the data frame to the corresponding game within the list. As data frame indexing starts at =0= there is not offset. For example, the row of index =7= of the data frame corresponds to game of index =8= within the game list.
 * Conclusion
 ** Results
 * Reflection
 * References
+
+#  LocalWords:  PGN

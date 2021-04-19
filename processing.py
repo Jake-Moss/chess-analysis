@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Union
 
 
 
@@ -47,8 +47,10 @@ def piece_delta(board: chess.Board, count: int, piece_count: Dict[int, int],
         if current_count < value: # Detects lost based on previous state
             piece_position = (key, uci_to_1d_array_index(board.peek().uci()), count)
             piece_count[key] = current_count # Modify by object-reference
+            break
         elif current_count > value: # Accounts for promotion
             piece_count[key] = current_count # Modify by object-reference
+            break
     return piece_position # piece id, position, count
 
 
@@ -69,18 +71,18 @@ def process_game(game: chess.pgn.Game, number_of_moves: int = 0) \
     piece_count = (
         # chess.BLACK
         {
-            chess.QUEEN: 1,
             chess.BISHOP: 2,
             chess.ROOK: 2,
             chess.KNIGHT: 2,
+            chess.QUEEN: 1,
             chess.PAWN: 8,
         },
         # chess.WHITE
         {
-            chess.QUEEN: 1,
             chess.BISHOP: 2,
             chess.ROOK: 2,
             chess.KNIGHT: 2,
+            chess.QUEEN: 1,
             chess.PAWN: 8,
         }
  )
@@ -102,5 +104,6 @@ def process_game(game: chess.pgn.Game, number_of_moves: int = 0) \
 
     return lost_pieces
 
-def in_range(lower: int, df, upper: int):
-    return df[df > lower] & df[df <= upper]
+
+def in_range(lower: Union[int, pd.Timestamp], df, upper: Union[int, pd.Timestamp]):
+    return (df > lower) & (df <= upper)

@@ -26,8 +26,9 @@ def lost_piece_heat_single_user(df: pd.DataFrame, username: str, colour: bool, p
 
     piece is int rather than string as python-chess uses int in backed.
     """
+    df_username = (df["White"] == username) | (df["Black"] == username) # GETS GAMES WHERE USERNAME PLAYED REGAURD LESS OF COLOUR
 
-    colour_played = (df["White"] == username).to_numpy() # zip colour played and df["Lost pieces"].to_numpy
+    colour_played = (df[df_username]["White"] == username).to_numpy() # zip colour played and df["Lost pieces"].to_numpy
     # to get the colour played on each game with the pieces lost of that colour.
     frequency = gen_frequency()
 
@@ -68,7 +69,10 @@ def lost_piece_freq_single_user(df: pd.DataFrame, username: str, colour: bool, p
 
     piece is int rather than string as python-chess uses int in backed.
     """
-    colour_played = (df["White"] == username).to_numpy() # zip colour played and df["Lost pieces"].to_numpy
+    df_username = (df["White"] == username) | (df["Black"] == username)
+
+    colour_played = (df[df_username]["White"] == username).to_numpy() # zip colour played and df["Lost pieces"].to_numpy
+    # colour_played = df_username.to_numpy() # zip colour played and df["Lost pieces"].to_numpy
     total_count = []
 
     for lost_pieces, colour_in_game in zip(df["Lost pieces"].to_numpy(), colour_played):
@@ -194,7 +198,7 @@ def plot_heatmap_grid(dfs: List, pieces: List[int], col_labels: List[str], colou
     global_max = max(local_maxs)
 
     fig, axs = plt.subplots(nrows = grid[0], ncols = grid[1])
-    fig.suptitle("{} pieces captured.".format(['White', 'Black'][colour]))
+    fig.suptitle("{}{} pieces captured.".format(str(username) + "'s " if username else "",['White', 'Black'][colour]))
 
     if np.size(axs) == max(grid): # Make types consistence smh matplotlib
         axs = np.reshape(axs, grid)
@@ -270,7 +274,7 @@ def plot_heatmap_single_piece(df: pd.DataFrame, pieces: List[int], username: str
             yticklabels=range(8,0,-1),
         )
 
-    subplot_matrix_format(np.reshape(axs, (1, 2)), (1, 2), [chess.PIECE_NAMES[piece].capitalize() for piece in pieces], col_labels)
+    subplot_matrix_format(axs, (1, 2), [chess.PIECE_NAMES[piece].capitalize() for piece in pieces], col_labels)
     fig.savefig(f"./images/{username}_HEATMAP_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}.png")
     return fig, axs
 
@@ -297,7 +301,7 @@ def plot_hist_grid(dfs: List, pieces: List[int], col_labels: List[str], colour: 
             else:
                 move_numbers = lost_piece_freq(dfs[col], colour, [piece])
             data[row].append(move_numbers)
-            local_greatest.append(np.max(move_numbers))
+            local_greatest.append(np.max(move_numbers) if move_numbers.size != 0 else 0)
 
     highest_move = max(local_greatest)
     fig, axs = plt.subplots(nrows = grid[0], ncols = grid[1])
@@ -334,53 +338,48 @@ def plot_hist_grid(dfs: List, pieces: List[int], col_labels: List[str], colour: 
     return fig, axs
 
 
-# def plot_heatmap_single_piece(df: pd.DataFrame, pieces: List[int], username: str = "", \
-#                               cmap = sns.diverging_palette(230, 20, as_cmap=True)) \
-#                               -> Tuple[plt.Figure, np.ndarray]:
+def plot_hist_single_piece(df: pd.DataFrame, pieces: List[int], \
+                      username: str = "", kde: bool = False) \
+                      -> Tuple[plt.Figure, np.ndarray]:
 
-#     col_labels = ["Black", "White"]
-#     local_maxs = []
-#     normalised = [
-#          # chess.BLACK
-#          # chess.WHITE
-#     ]
-#     for colour in [chess.BLACK, chess.WHITE]:
-#         if username: # non-empty evals to true
-#             freq, local_max = normalise(
-#                 lost_piece_heat_single_user(df, username, colour, pieces)
-#             )
-#         else:
-#             freq, local_max = normalise(
-#                 lost_piece_heat(df, colour, pieces)
-#             )
-#         local_maxs.append(local_max)
-#         normalised.append(freq)
+    col_labels = ["Black", "White"]
 
-#     global_max = max(local_maxs)
+    local_greatest = []
+    data = []
+    for colour in [chess.BLACK, chess.WHITE]:
+        if username: # non-empty evals to true
+            move_numbers = lost_piece_freq_single_user(df, username, colour, pieces)
+        else:
+            move_numbers = lost_piece_freq(df, colour, pieces)
+        data.append(move_numbers)
+        print(move_numbers)
+        local_greatest.append(np.max(move_numbers) if move_numbers.size != 0 else 0)
 
-#     fig, axs = plt.subplots(nrows = 1, ncols = 2)
-#     fig.suptitle("{} {} captured.".format(" and ".join(['Black', 'White']), "s, ".join([chess.PIECE_NAMES[piece].capitalize() for piece in pieces]) + "s"))
+    highest_move = max(local_greatest)
+    fig, axs = plt.subplots(nrows = 1, ncols = 2)
+    fig.suptitle("{} {} captured through time.".format(" and ".join(['Black', 'White']), "s, ".join([chess.PIECE_NAMES[piece].capitalize() for piece in pieces]) + "s"))
 
-#     axs = np.reshape(axs, (1, 2))
+    axs = np.reshape(axs, (1, 2))
 
-#     fig.subplots_adjust(right=0.8)
+    if kde:
+        for colour in [int(chess.BLACK), int(chess.WHITE)]: # see below for reason of werid cast
+            sns.kdeplot(
+                data=data[colour],
+                ax=axs[0][colour],
+                fill=True,
+                common_norm=True,
+            )
+            axs[0][colour].set_xlim(right=highest_move)
+    else:
+        for colour in [int(chess.BLACK), int(chess.WHITE)]: # see below for reason of werid cast
+            sns.histplot(
+                data=data[colour],
+                ax=axs[0][colour],
+                common_norm=True,
+                binwidth=2,
+            )
+            axs[0][colour].set_xlim(right=highest_move)
 
-#     cbar_ax = fig.add_axes([0.85, 0.15, 0.03, 0.7])
-
-#     print(axs)
-#     for colour in [int(chess.BLACK), int(chess.WHITE)]: # see below for reason of werid cast
-#         sns.heatmap(
-#             data=normalised[colour],
-#             vmin=0,
-#             vmax=global_max,
-#             cbar=True,
-#             ax=axs[0][colour], # numpy arrays cannot be index by bools like normal arrays this took way to long to figure out. Normal arrays can cause the bools are duck typed to ints but not numpy arrays the special bastards
-#             cmap=cmap,
-#             square=True,
-#             cbar_ax=cbar_ax,
-#             xticklabels=list(ascii_letters[:8]),
-#             yticklabels=range(8,0,-1),
-#         )
-
-#     subplot_matrix_format(np.reshape(axs, (1, 2)), (1, 2), [chess.PIECE_NAMES[piece].capitalize() for piece in pieces], col_labels)
-#     return fig, axs
+    subplot_matrix_format(axs, (1, 2), [chess.PIECE_NAMES[x].capitalize() for x in pieces], col_labels)
+    fig.savefig(f"./images/{username}_{'KDE' if kde else 'HIST'}_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}_{['BLACK', 'WHITE'][colour]}.png")
+    return fig, axs

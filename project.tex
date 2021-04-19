@@ -1,0 +1,204 @@
+% Created 2021-04-16 Fri 13:53
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage[top=1in, bottom=1.25in, left=1.25in, right=1.25in]{geometry}
+\setlength{\parindent}{0pt}
+
+\usepackage[main,include]{embedall}
+\IfFileExists{./\jobname.org}{\embedfile[desc=The original file]{\jobname.org}}{}
+
+
+
+
+
+\usepackage{fvextra}
+\fvset{
+  commandchars=\\\{\},
+  highlightcolor=white!95!black!80!blue,
+  breaklines=true,
+  breaksymbol=\color{white!60!black}\tiny\ensuremath{\hookrightarrow},
+}
+\renewcommand\theFancyVerbLine{\footnotesize\color{black!40!white}\arabic{FancyVerbLine}}
+
+\usepackage[many]{tcolorbox}
+\DeclareTColorBox[]{Code}{}%
+{enhanced,
+  colback=white!97!black,
+  colframe=white!94!black, boxrule=0.5pt,
+  fontupper=\color{EFD}\footnotesize,
+  arc=2.5pt, outer arc=2.5pt,
+  boxsep=2pt, left=2pt, right=2pt, top=1pt, bottom=0.5pt,
+  breakable}
+
+\definecolor{EFD}{HTML}{383a42}
+\newcommand{\EFD}[1]{\textcolor{EFD}{#1}} % default
+\definecolor{EFk}{HTML}{e45649}
+\newcommand{\EFk}[1]{\textcolor{EFk}{#1}} % font-lock-keyword-face
+\definecolor{EFd}{HTML}{84888b}
+\newcommand{\EFd}[1]{\textcolor{EFd}{\textit{#1}}} % font-lock-doc-face
+\definecolor{EFt}{HTML}{986801}
+\newcommand{\EFt}[1]{\textcolor{EFt}{#1}} % font-lock-type-face
+\definecolor{EFs}{HTML}{50a14f}
+\newcommand{\EFs}[1]{\textcolor{EFs}{#1}} % font-lock-string-face
+\definecolor{EFw}{HTML}{986801}
+\newcommand{\EFw}[1]{\textcolor{EFw}{#1}} % font-lock-warning-face
+\definecolor{EFb}{HTML}{a626a4}
+\newcommand{\EFb}[1]{\textcolor{EFb}{#1}} % font-lock-builtin-face
+\definecolor{EFct}{HTML}{9ca0a4}
+\newcommand{\EFct}[1]{\textcolor{EFct}{#1}} % font-lock-comment-face
+\definecolor{EFc}{HTML}{b751b6}
+\newcommand{\EFc}[1]{\textcolor{EFc}{#1}} % font-lock-constant-face
+\definecolor{EFpp}{HTML}{4078f2}
+\newcommand{\EFpp}[1]{\textcolor{EFpp}{\textbf{#1}}} % font-lock-preprocessor-face
+\definecolor{EFnc}{HTML}{4078f2}
+\newcommand{\EFnc}[1]{\textcolor{EFnc}{\textbf{#1}}} % font-lock-negation-char-face
+\definecolor{EFv}{HTML}{6a1868}
+\newcommand{\EFv}[1]{\textcolor{EFv}{#1}} % font-lock-variable-name-face
+\definecolor{EFf}{HTML}{a626a4}
+\newcommand{\EFf}[1]{\textcolor{EFf}{#1}} % font-lock-function-name-face
+\definecolor{EFcd}{HTML}{9ca0a4}
+\newcommand{\EFcd}[1]{\textcolor{EFcd}{#1}} % font-lock-comment-delimiter-face
+\definecolor{EFrc}{HTML}{4078f2}
+\newcommand{\EFrc}[1]{\textcolor{EFrc}{\textbf{#1}}} % font-lock-regexp-grouping-construct
+\definecolor{EFrb}{HTML}{4078f2}
+\newcommand{\EFrb}[1]{\textcolor{EFrb}{\textbf{#1}}} % font-lock-regexp-grouping-backslash
+\definecolor{EFhn}{HTML}{da8548}
+\newcommand{\EFhn}[1]{\textcolor{EFhn}{\textbf{#1}}} % highlight-numbers-number
+\definecolor{EFhq}{HTML}{4078f2}
+\newcommand{\EFhq}[1]{\textcolor{EFhq}{#1}} % highlight-quoted-quote
+\definecolor{EFhs}{HTML}{986801}
+\newcommand{\EFhs}[1]{\textcolor{EFhs}{#1}} % highlight-quoted-symbol
+\definecolor{EFrdi}{HTML}{4078f2}
+\newcommand{\EFrdi}[1]{\textcolor{EFrdi}{#1}} % rainbow-delimiters-depth-1-face
+\definecolor{EFrdii}{HTML}{a626a4}
+\newcommand{\EFrdii}[1]{\textcolor{EFrdii}{#1}} % rainbow-delimiters-depth-2-face
+\definecolor{EFrdiii}{HTML}{50a14f}
+\newcommand{\EFrdiii}[1]{\textcolor{EFrdiii}{#1}} % rainbow-delimiters-depth-3-face
+\definecolor{EFrdiv}{HTML}{da8548}
+\newcommand{\EFrdiv}[1]{\textcolor{EFrdiv}{#1}} % rainbow-delimiters-depth-4-face
+\definecolor{EFrdv}{HTML}{b751b6}
+\newcommand{\EFrdv}[1]{\textcolor{EFrdv}{#1}} % rainbow-delimiters-depth-5-face
+\definecolor{EFrdvi}{HTML}{986801}
+\newcommand{\EFrdvi}[1]{\textcolor{EFrdvi}{#1}} % rainbow-delimiters-depth-6-face
+\definecolor{EFrdvii}{HTML}{4db5bd}
+\newcommand{\EFrdvii}[1]{\textcolor{EFrdvii}{#1}} % rainbow-delimiters-depth-7-face
+\definecolor{EFrdiix}{HTML}{80a880}
+\newcommand{\EFrdiix}[1]{\textcolor{EFrdiix}{#1}} % rainbow-delimiters-depth-8-face
+\definecolor{EFrdix}{HTML}{887070}
+\newcommand{\EFrdix}[1]{\textcolor{EFrdix}{#1}} % rainbow-delimiters-depth-9-face
+\author{Jake Moss - s46409665}
+\date{\today}
+\title{Project}
+\hypersetup{
+ pdfauthor={Jake Moss - s46409665},
+ pdftitle={Project},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 28.0.50 (Org mode 9.5)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+
+\section{Introduction}
+\label{sec:org5be808b}
+\subsection{Project aims}
+\label{sec:orgcfceece}
+The goal of this project was to provide a new and somewhat unique visualisations of chess games. I plan to do this by plotting various positions of events such as
+\begin{itemize}
+\item[{$\boxtimes$}] Captures
+\item[{$\square$}] Checks
+\item[{$\square$}] Checkmates
+\end{itemize}
+In addition to these I plan to show when these events happen throughout games.
+
+The purpose of this project is to show the positional differences between different levels of play and over time. This is something not often visualised within the community thus I thought it would be a unique take on some common statistic.
+\subsection{Obtaining data}
+\label{sec:org47aa308}
+\subsubsection{Sources}
+\label{sec:org3da5936}
+Chess games are found freely on the internet from many archives such as \href{https://www.pgnmentor.com/files.html}{PGN Mentor}. From here I am able to download thousands of games at mass. However as most games preserved will of famous players there will be significant bias. To help mitigate this I can use the public API's from \href{https://lichess.org/}{Lichess} and \href{https://www.chess.com/}{Chess.com} to gather games from friends and players from various ELO's.
+
+To pull games from Chess.com I use this bash command to gather the PGN files from individual months and write them to a single file as Chess.com does not support downloading of all games at once.
+\begin{Code}
+\begin{Verbatim}[]
+\color[HTML]{383a42}\EFk{for} g\EFk{ in} \$\textcolor[HTML]{4078f2}{(}\textcolor[HTML]{986801}{curl} -Ls https://api.chess.com/pub/player/\$\EFv{PLAYERNAME}/games/archives | jq -rc \EFs{".archives[]"}\textcolor[HTML]{4078f2}{)} ; \EFk{do} \textcolor[HTML]{986801}{curl} -Ls \EFs{"}\textcolor[HTML]{b751b6}{\$}\textcolor[HTML]{6a1868}{g}\EFs{"} | jq -rc \EFs{".games[].pgn"} ; \EFk{done} >> games.pgn
+\end{Verbatim}
+\end{Code}
+
+Lichess easily allows for downloading of an entire players archive at once with
+a simple \texttt{curl}.
+\begin{Code}
+\begin{Verbatim}[]
+\color[HTML]{383a42}\textcolor[HTML]{986801}{curl} https://lichess.org/games/export/\$\EFv{PLAYERNAME} > games.pgn
+\end{Verbatim}
+\end{Code}
+\subsubsection{PGN Format}
+\label{sec:org578f18a}
+The most common format used to store chess games is \href{https://en.wikipedia.org/wiki/Portable\_Game\_Notation}{Portable Game Notation}. It is a human readable plain text notation which stores individual moves rather than the board states. While this is considerably more efficient for both storage and computation it makes extracting data that isn't explicitly given difficult and costly.
+
+The \href{http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm}{standard} defines a required \href{http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm\#c8.1.1}{seven tag roster} and allows for optional tags such as \texttt{WhiteElo} and \texttt{BlackElo}. Each move is stored in \href{https://en.wikipedia.org/wiki/Algebraic\_notation\_(chess)}{Standard Algebraic Notation}, which describes the change in board state such as captures, checks, and promotions.
+
+SAN comes in a varsity of formats short, long, or minimal. Each variant encodes moves with different levels of detail. Unfortunately no single variant is used in all PGN databases, although it is rare for the format to change from within a database.
+
+Due to the variation within each format and the format implicitly encoding data I wished to extract I chose not to write my own PGN parser and invalidator and instead to use an existing popular library, \href{https://github.com/niklasf/python-chess}{python-chess}.
+
+I would have preferred to use an alternative notation, \texttt{Reversible algebraic}, as it explicitly states the captured piece and its position within plain text. This would have allowed me to directly gather the data using regex without playing out each game.
+\subsection{Motivation}
+\label{sec:orgceed097}
+As someone who does not play chess this is a strange choice of a project.
+\section{Data Processing}
+\label{sec:orgfb3cd5c}
+\subsection{Tools used}
+\label{sec:orga14c537}
+In this project I make use of 4 libraries
+\begin{itemize}
+\item \href{https://github.com/niklasf/python-chess}{python-chess}
+Used to handle the complex move validation and PGN parsing required.
+\item \href{https://matplotlib.org/}{matplotlib}
+Standard plotting library.
+\item \href{https://seaborn.pydata.org/}{seaborn}
+A high level plotting library based on \texttt{matplotlib}.
+\item \href{https://numpy.org/}{numpy}
+Standard scientific computing library. Within this project it is used to for its \texttt{pandas} optimisations, and reshape function.
+\item \href{https://pandas.pydata.org/}{pandas}
+Data frames provide an easy way to conditionaly select games based on metadata.
+\end{itemize}
+\subsection{Meta Data Extraction}
+\label{sec:orga23aaf1}
+\subsection{Extracting Implicit Data}
+\label{sec:orgae539bc}
+\subsection{Data storage}
+\label{sec:org93e38ef}
+\section{Data Analysis}
+\label{sec:orgdf585be}
+\subsection{Local and Global Normalisation}
+\label{sec:org7e34c63}
+\subsection{Difficulties and bugs}
+\label{sec:org2adf2aa}
+\subsubsection{Pawn capture on 8th rank}
+\label{sec:org6cb3601}
+\section{Conclusion}
+\label{sec:org60039ac}
+\subsection{Results}
+\label{sec:orgb2f5817}
+\section{Reflection}
+\label{sec:orga8e2a4c}
+\section{References}
+\label{sec:org888c3a9}
+\end{document}

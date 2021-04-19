@@ -4,27 +4,27 @@
    (TeX-add-to-alist 'LaTeX-provided-class-options
                      '(("article" "11pt")))
    (TeX-add-to-alist 'LaTeX-provided-package-options
-                     '(("inputenc" "utf8") ("fontenc" "T1") ("ulem" "normalem") ("embedall" "main" "include") ("tcolorbox" "many")))
-   (add-to-list 'LaTeX-verbatim-environments-local "VerbatimOut")
-   (add-to-list 'LaTeX-verbatim-environments-local "SaveVerbatim")
-   (add-to-list 'LaTeX-verbatim-environments-local "LVerbatim*")
-   (add-to-list 'LaTeX-verbatim-environments-local "LVerbatim")
-   (add-to-list 'LaTeX-verbatim-environments-local "BVerbatim*")
-   (add-to-list 'LaTeX-verbatim-environments-local "BVerbatim")
-   (add-to-list 'LaTeX-verbatim-environments-local "Verbatim*")
+                     '(("inputenc" "utf8") ("fontenc" "T1") ("ulem" "normalem") ("geometry" "top=1in" "bottom=1.25in" "left=1.25in" "right=1.25in") ("embedall" "main" "include") ("tcolorbox" "many")))
    (add-to-list 'LaTeX-verbatim-environments-local "Verbatim")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "href")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperref")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperimage")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperbaseurl")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "nolinkurl")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "url")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "path")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "EscVerb")
+   (add-to-list 'LaTeX-verbatim-environments-local "Verbatim*")
+   (add-to-list 'LaTeX-verbatim-environments-local "BVerbatim")
+   (add-to-list 'LaTeX-verbatim-environments-local "BVerbatim*")
+   (add-to-list 'LaTeX-verbatim-environments-local "LVerbatim")
+   (add-to-list 'LaTeX-verbatim-environments-local "LVerbatim*")
+   (add-to-list 'LaTeX-verbatim-environments-local "SaveVerbatim")
+   (add-to-list 'LaTeX-verbatim-environments-local "VerbatimOut")
    (add-to-list 'LaTeX-verbatim-macros-with-braces-local "EscVerb*")
-   (add-to-list 'LaTeX-verbatim-macros-with-delims-local "Verb*")
-   (add-to-list 'LaTeX-verbatim-macros-with-delims-local "Verb")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "EscVerb")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "path")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "url")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "nolinkurl")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperbaseurl")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperimage")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperref")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "href")
    (add-to-list 'LaTeX-verbatim-macros-with-delims-local "path")
+   (add-to-list 'LaTeX-verbatim-macros-with-delims-local "Verb")
+   (add-to-list 'LaTeX-verbatim-macros-with-delims-local "Verb*")
    (TeX-run-style-hooks
     "latex2e"
     "article"
@@ -42,6 +42,7 @@
     "amssymb"
     "capt-of"
     "hyperref"
+    "geometry"
     "embedall"
     "fvextra"
     "tcolorbox")
@@ -72,7 +73,28 @@
     '("EFs" 1)
     '("EFt" 1)
     '("EFd" 1)
-    '("EFk" 1))
+    '("EFk" 1)
+    '("EFD" 1))
+   (LaTeX-add-labels
+    "sec:org5be808b"
+    "sec:orgcfceece"
+    "sec:org47aa308"
+    "sec:org3da5936"
+    "sec:org578f18a"
+    "sec:orgceed097"
+    "sec:orgfb3cd5c"
+    "sec:orga14c537"
+    "sec:orga23aaf1"
+    "sec:orgae539bc"
+    "sec:org93e38ef"
+    "sec:orgdf585be"
+    "sec:org7e34c63"
+    "sec:org2adf2aa"
+    "sec:org6cb3601"
+    "sec:org60039ac"
+    "sec:orgb2f5817"
+    "sec:orga8e2a4c"
+    "sec:org888c3a9")
    (LaTeX-add-xcolor-definecolors
     "EFD"
     "EFk"
