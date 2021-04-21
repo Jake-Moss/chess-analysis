@@ -38,11 +38,13 @@ def piece_delta(board: chess.Board, count: int, piece_count: Dict[int, int],
     Detects when a piece is lost by counting the number of ones on the piece
     board mask and tracking the previous value.
 
-    Would be really nice if the deves merged this :|
+    Would be really nice if the devs merged this :|
     https://github.com/niklasf/python-chess/pull/296/commits/498dd015cbffffb57bc7ef2a6d097fb6d9340eed
     """
     piece_position = (0, 0, 0)
+    # print(piece_count)
     for key, value in piece_count.items():
+        # print(key, value)
         current_count = bin(board.pieces_mask(key, colour)).count('1')  # REQUIRES THE MOVE BE MADE (CAPTURED)
         if current_count < value: # Detects lost based on previous state
             piece_position = (key, uci_to_1d_array_index(board.peek().uci()), count)
@@ -50,6 +52,7 @@ def piece_delta(board: chess.Board, count: int, piece_count: Dict[int, int],
             break
         elif current_count > value: # Accounts for promotion
             piece_count[key] = current_count # Modify by object-reference
+            piece_count[chess.PAWN] = bin(board.pieces_mask(chess.PAWN, colour)).count('1')  # Account for pawn count change
             break
     return piece_position # piece id, position, count
 
@@ -97,7 +100,8 @@ def process_game(game: chess.pgn.Game, number_of_moves: int = 0) \
         # Get captures on this turn
         if board.is_capture(board.peek()):
             piece = get_captures(board, board.peek(), count, piece_count[turn])
-            if piece[0]: # Check if piece was captured and not just the default return
+            # print(board.is_capture(board.peek()))
+            if piece[0]:
                 lost_pieces[turn].append(piece)
         if (count >= number_of_moves) and number_of_moves: # Stop after moving n times and n is non-zero
             break

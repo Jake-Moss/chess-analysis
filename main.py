@@ -92,13 +92,13 @@ def main():
     # fig, axs = plot_hist_grid(bins, pieces, col_labels, chess.BLACK)
     # fig, axs = plot_hist_grid(bins, pieces, col_labels, chess.BLACK, kde=True)
 
-    # fig, axs = plot_heatmap_single_piece(df, [chess.PAWN], username="DaenaliaEvandruile")
+    fig, axs = plot_heatmap_single_piece(df, [chess.PAWN], username="DaenaliaEvandruile")
     # for piece in chess.PIECE_TYPES:
     #     fig, axs = plot_heatmap_single_piece(df, [piece], username="DaenaliaEvandruile")
 
-    fig, axs = plot_hist_single_piece(df, [chess.PAWN], username="DaenaliaEvandruile")
-    for piece in chess.PIECE_TYPES:
-        fig, axs = plot_hist_single_piece(df, [piece], username="DaenaliaEvandruile")
+    # fig, axs = plot_hist_single_piece(df, [chess.PAWN], username="DaenaliaEvandruile", kde=True)
+    # for piece in chess.PIECE_TYPES:
+    #     fig, axs = plot_hist_single_piece(df, [piece], username="DaenaliaEvandruile", kde=True)
 
     plt.show()
 
@@ -108,10 +108,10 @@ def main():
 
     # show(df)
 
-    return df
+    return df, games
 
 if __name__ == "__main__":
-    df = main()
+    df, games = main()
 
 # def animate(i):
 #     fig, axs = plot_heatmap_grid(bins, pieces, col_labels, chess.BLACK)

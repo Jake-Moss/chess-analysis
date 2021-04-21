@@ -320,7 +320,7 @@ def plot_hist_grid(dfs: List, pieces: List[int], col_labels: List[str], colour: 
                     fill=True,
                     common_norm=True,
                 )
-                axs[row][col].set_xlim(right=highest_move)
+                axs[row][col].set_xlim(left=0 ,right=highest_move)
     else:
         for row in range(grid[0]):
             for col in range(grid[1]):
@@ -331,7 +331,7 @@ def plot_hist_grid(dfs: List, pieces: List[int], col_labels: List[str], colour: 
                     common_norm=True,
                     binwidth=2,
                 )
-                axs[row][col].set_xlim(right=highest_move)
+                axs[row][col].set_xlim(left=0 ,right=highest_move)
 
     subplot_matrix_format(axs, grid, [chess.PIECE_NAMES[x].capitalize() for x in pieces], col_labels)
     fig.savefig(f"./images/{username}_{'KDE' if kde else 'HIST'}_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}_{['BLACK', 'WHITE'][colour]}.png")
@@ -352,7 +352,6 @@ def plot_hist_single_piece(df: pd.DataFrame, pieces: List[int], \
         else:
             move_numbers = lost_piece_freq(df, colour, pieces)
         data.append(move_numbers)
-        print(move_numbers)
         local_greatest.append(np.max(move_numbers) if move_numbers.size != 0 else 0)
 
     highest_move = max(local_greatest)
@@ -369,7 +368,7 @@ def plot_hist_single_piece(df: pd.DataFrame, pieces: List[int], \
                 fill=True,
                 common_norm=True,
             )
-            axs[0][colour].set_xlim(right=highest_move)
+            axs[0][colour].set_xlim(left=0 ,right=highest_move)
     else:
         for colour in [int(chess.BLACK), int(chess.WHITE)]: # see below for reason of werid cast
             sns.histplot(
@@ -378,8 +377,8 @@ def plot_hist_single_piece(df: pd.DataFrame, pieces: List[int], \
                 common_norm=True,
                 binwidth=2,
             )
-            axs[0][colour].set_xlim(right=highest_move)
+            axs[0][colour].set_xlim(left=0 ,right=highest_move)
 
     subplot_matrix_format(axs, (1, 2), [chess.PIECE_NAMES[x].capitalize() for x in pieces], col_labels)
-    fig.savefig(f"./images/{username}_{'KDE' if kde else 'HIST'}_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}_{['BLACK', 'WHITE'][colour]}.png")
+    fig.savefig(f"./images/{username}_{'KDE' if kde else 'HIST'}_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}.png")
     return fig, axs
