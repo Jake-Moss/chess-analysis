@@ -10,23 +10,23 @@ dataframe with meta data.
 """
 
 COLUMNS = [
-    'Event',
-    'Site',
+    # 'Event',
+    # 'Site',
     'Date',
-    'Round',
+    # 'Round',
     'White',
     'Black',
-    'Result',
+    # 'Result',
     'BlackElo',
-    'BlackRatingDiff',
-    'ECO',
-    'Termination',
-    'TimeControl',
-    'UTCDate',
-    'UTCTime',
-    'Variant',
+    # 'BlackRatingDiff',
+    # 'ECO',
+    # 'Termination',
+    # 'TimeControl',
+    # 'UTCDate',
+    # 'UTCTime',
+    # 'Variant',
     'WhiteElo',
-    'WhiteRatingDiff',
+    # 'WhiteRatingDiff',
 ]
 
 def load_pgn(filename: str) -> List[chess.pgn.Game]:

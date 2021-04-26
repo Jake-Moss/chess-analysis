@@ -1,47 +1,48 @@
-#+TITLE: Project
+#+TITLE: Project - Positional analysis of chess games
 #+author: Jake Moss - s46409665
 #+latex_header: \usepackage[top=1in, bottom=1.25in, left=1.25in, right=1.25in]{geometry}
 #+latex_header: \usepackage{amsmath}
-#+latex_header: \setlength{\parindent}{0pt}
+#+LATEX_HEADER: \usepackage{parskip}
 #+options: tasks:nil
 
+\newpage
 
 * Introduction
 ** Project aims
-The goal of this project was to provide a new and somewhat unique visualisations of chess games. I plan to do this by plotting various positions of events such as
- - [X] Captures
- - [ ] Checks
- - [ ] Checkmates
-In addition to these I plan to show when these events happen throughout games.
+The goal of this project was to provide a new and unique visualisations of chess games. To accomplish this two main plots where developed,
 
-The purpose of this project is to show the positional differences between different levels of play and over time. This is something not often visualised within the community thus I thought it would be a unique take on some common statistic.
+ + Heat map of where pieces were captured
+ + Histogram of when pieces were captured
+
+The purpose of this project is to show the positional differences between different levels of play and in different time periods. This is something not often visualised within the community.
 ** Obtaining data
 *** Sources
-Chess games are found freely on the internet from many archives such as [[https://www.pgnmentor.com/files.html][PGN Mentor]]. From here I am able to download thousands of games at mass using a FireFox extension. However as most preserved games are of tournaments and high skill players this data doesn't not sure what happens in common games. To help mitigate this I can use the public API's from [[https://lichess.org/][Lichess]] and [[https://www.chess.com/][Chess.com]] to gather games from friends and players from various ELO's.
+Chess games are found freely on the internet from many archives such as [[https://www.pgnmentor.com/files.html][PGN Mentor]] and [[https://www.ficsgames.org/download.html][FICS Games Database]]. From here I am able to download millions of games at mass. However for large time periods most preserved games are of tournaments and high skill players this data doesn't not sure what happens in common games. To help mitigate this the ~FISC~ database was used to analyse a wide range of skill level games from a single year.
+This tool was also build with the capability to analyse a single players games given their username from [[https://lichess.org/][Lichess]] and [[https://www.chess.com/][Chess.com.]] These games can be downloaded using their respective public API's.
 
-To pull games from Chess.com I use this bash command to gather the PGN files from individual months and write them to a single file as Chess.com does not support downloading of all games at once.
+To download games from [[https://www.chess.com/][Chess.com]] the bash command below can be used.
 #+begin_src bash :exports code :results none
 for g in $(curl -Ls https://api.chess.com/pub/player/$PLAYERNAME/games/archives | jq -rc ".archives[]") ; do curl -Ls "$g" | jq -rc ".games[].pgn" ; done >> games.pgn
 #+end_src
 
-Lichess easily allows for downloading of an entire players archive at once with
-a simple =curl=.
+Lichess easily allows for downloading of an entire players archive at once with a simple =curl=.
 #+begin_src bash :exports code :results none
 curl https://lichess.org/games/export/$PLAYERNAME > games.pgn
 #+end_src
-*** PGN Format
-The most common format used to store chess games is [[https://en.wikipedia.org/wiki/Portable_Game_Notation][Portable Game Notation]]. It is a human readable plain text notation which stores individual moves rather than the board states. While this is considerably more efficient for both storage and computation it makes extracting data that isn't explicitly given difficult and costly.
 
-The [[http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm][standard]] defines a required [[http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm#c8.1.1][seven tag roster]] and allows for optional tags such as =WhiteElo= and =BlackElo=. Each move is stored in [[https://en.wikipedia.org/wiki/Algebraic_notation_(chess)][Standard Algebraic Notation]], which describes the change in board state such as captures, checks, and promotions.
+~DaenaliaEvandruile~ has given their permission for their games to be featured with this report to demonstrate this functionality.
+*** PGN Format
+The most common format used to store chess games is [[https://en.wikipedia.org/wiki/Portable_Game_Notation][Portable Game Notation]]. It is a human readable plain text notation which stores individual moves rather than the board states. While this is considerably more efficient for both storage and transcribing it makes extracting data that isn't explicitly given difficult and costly.
+
+The [[http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm][PGN standard]] defines a required [[http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm#c8.1.1][seven tag roster]] and allows for optional tags such as =WhiteElo= and =BlackElo=. Each move is stored in [[https://en.wikipedia.org/wiki/Algebraic_notation_(chess)][Standard Algebraic Notation]], which describes the change in board state such as captures, checks, and promotions.
 
 SAN comes in a varsity of formats short, long, or minimal. Each variant encodes moves with different levels of detail. Unfortunately no single variant is used in all PGN databases, although it is rare for the format to change from within a database.
 
-A standard might look something like this
+A standard game might look something like this
 #+begin_example
 [Event "WCh 2018"]
 [Site "London ENG"]
 [Date "2018.11.09"]
-[Round "1"]
 [White "Caruana, Fabiano"]
 [Black "Carlsen, Magnus"]
 [Result "1/2-1/2"]
@@ -49,9 +50,6 @@ A standard might look something like this
 [BlackTitle "GM"]
 [WhiteElo "2832"]
 [BlackElo "2835"]
-[ECO "B31"]
-[Opening "Sicilian"]
-[Variation "Nimzovich-Rossolimo attack (with ...g6, without ...d6)"]
 [WhiteFideId "2020009"]
 [BlackFideId "1503014"]
 [EventDate "2018.11.09"]
@@ -59,15 +57,9 @@ A standard might look something like this
 1. e4 c5 2. Nf3 Nc6 3. Bb5 g6 ... 115. Ra8 1/2-1/2
 #+end_example
 Tags preface the game in ~[]~, often far more than required are provided. These tags are referred to as the headers. The moves themselves are listed in SAN with the result at the end.
-
-Due to the variation within each format and the format implicitly encoding data I wished to extract I chose not to write my own PGN parser and invalidator and instead to use an existing popular library, [[https://github.com/niklasf/python-chess][python-chess]].
-
-I would have preferred to use an alternative notation, =Reversible algebraic=, as it explicitly states the captured piece and its position within plain text. This would have allowed me to directly gather the data using regex without playing out each game.
-** Motivation
-As someone who does not play chess this is a strange choice of a project.
 * Data Processing
 ** Tools used
-In this project I make use of 4 libraries
+This project made use of the below tools,
  - [[https://github.com/niklasf/python-chess][python-chess]]
    Used to handle the complex move validation and PGN parsing required to step though games.
  - [[https://matplotlib.org/][matplotlib]]
@@ -78,102 +70,250 @@ In this project I make use of 4 libraries
    Standard scientific computing library. Within this project it is used to for its ~pandas~ optimisations, and reshape function.
  - [[https://pandas.pydata.org/][pandas]]
    Data frames provide an efficient way to store and conditionally select games based on metadata.
+ - [[https://github.com/python/cpython][cPython Profiler]]
+   Function call profiler
+ - [[https://jiffyclub.github.io/snakeviz/][snakeViz]]
+   In browser ~cPython profiler~ visualiser.
+
 ** Meta Data Extraction
 To extract the metadata from a game the PGN file is read using standard python methods and the game object is initialised using the ~aggergate~ function from the ~aggergation.py~ module. From the game object the headers are extracted into a dictionary and a data frame is created consisting of the headers are column titles and rows as individual games.
 
-|     | SAN string   | Black  | White  | Result   | BlackElo | WhiteElo | Date       | ... |
-|-----+--------------+--------+--------+----------+----------+----------+------------+-----|
-|   1 | =SAN string= | =name= | =name= | =string= | =int=    | =int=    | =DateTime= | ... |
-| ... |              |        |        |          |          |          |            |     |
-
+|     | SAN string   | Black    | White    | Result   | BlackElo | WhiteElo | Date       | ... |
+|-----+--------------+----------+----------+----------+----------+----------+------------+-----|
+|   1 | =string= | =string= | =string= | =string= | =int=    | =int=    | =DateTime= | ... |
+| ... |              |          |          |          |          |          |            |     |
 
 ** Extracting Implicit Data
-To extract the "implicit data" such as piece captures each game must be played out in its entirety with each move analysed.
+To extract the "implicit data", such as piece captures, each game must be played out in its entirety with each move analysed as the format games are encoded in does not explicitly give this information.
+
+This data is then appended to the metadata data frame in another column. This allows for each conditioning of the data fame.
 * Data Analysis
 ** Local and Global Normalisation
 Within the heat map grid plots, each map shares the colour bar on the right. To accomplish this each square with each map is normalised to the sum of the local grid so that the map represents proportion instead of frequency. From this we now know that the maximum value is =1= and the colour bar can be calibrated to =[0,1]=. However, as the proportion of lost pieces rarely gets close to =0.5= let alone =1=, the colours become hard to differentiate.
 
 To remedy this I set the maximum of all local maximums to the max of the colour bar. This made it so that each plot is proportional to itself and the colouring is consistent between plots.
-#+attr_latex: :width 300
-#+attr_org: :width 300
-[[file:images/DaenaliaEvandruile_HEATMAP_Pawn_WHITE_EXAMPLE_1_WITH_WRONG_COLOUR.png]]
 
-#+attr_latex: :width 300
-#+attr_org: :width 300
-[[file:images/DaenaliaEvandruile_HEATMAP_Pawn.png]]
-
-A similar strategy was employed to ensure the histograms and kernel density plots shared the same axis.
-#+attr_latex: :width 300
-#+attr_org: :width 300
-
-** Difficulties and issues
-*** Pawn capture on 8th rank
-Some pawn capture heat maps show a capture on the 8th rank (furthest row away from the starting position). According to the FIDE
-#+begin_quote
-3.7e) When  a  pawn  reaches  the  rank  furthest  from  its  starting  position  it  must  be  exchanged  as  part  of  the  same  move  on  the  same  square  for  a  new queen,  rook,  bishop  or  knight  of  the  same  colour.  The  player’s  choice  is  not  restricted  to  pieces  that  have  been  captured  previously.  This  exchange  of  a  pawn  for  another  piece  is  called ‘promotion’ and the effect of the new piece is immediate.
-cite:FIDE
-#+end_quote
-Thus a pawn can never be captured on the 8th rank.
-
-This bug likely occurs due to how the detection of captures and handling of positions works. While promotions are accounted for there is a specific edge case that persists.
-
-#+begin_src python :export code :results none
-def piece_delta(board: chess.Board, count: int, piece_count: Dict[int, int],
-                colour: bool) -> Tuple[int, int, int]:
-    piece_position = (0, 0, 0)
-    for key, value in piece_count.items():
-        current_count = bin(board.pieces_mask(key, colour)).count('1')
-        if current_count < value: # Detects lost based on previous state
-            piece_position = (key, uci_to_1d_array_index(board.peek().uci()), count)
-            piece_count[key] = current_count # Modify by object-reference
-            break
-        elif current_count > value: # Accounts for promotion
-            piece_count[key] = current_count # Modify by object-reference
-            piece_count[chess.PAWN] = bin(board.pieces_mask(chess.PAWN, colour)).count('1')  # Account for pawn count change
-            break
-    return piece_position # piece id, position, count
-#+end_src
-
-This code block works by making mask of the current board state. This returns a boolean bitboard consisting only of the piece requested.
-#+caption: Piece mask of Black starting pawns
-| / | < |   |   |   |   |   |   | > |
-|---+---+---+---+---+---+---+---+---|
-|   | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-|   | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
-|   | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-|   | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-|   | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-|   | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-|   | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-|   | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-|---+---+---+---+---+---+---+---+---|
-This is then counted and used as the number of current pieces of the piece type present. As this method only keeps track of the number of pieces on the board at once and relies on the previous state to detect a capture it can be easily broken by a change in the piece count other than a capture. For example promotions, as promotions exchange a pawn in favour of another piece type the piece change is not negative. Although this is accounted for there is still a specific edge case which is not caught.
-
-After a pawn promotes, if it is immediately captured the lost piece is still attributed as a pawn. I was unable to squash this bug.
-*** Timezones and my ignorance of them
-In 1918, Russia switched from the Julian calendar to the Gregorian calendar. In the switch the dates from   1st–13th of February. In doing so breaking any naive date comparison implementation from before the switch to after.
-
-As Tom Scott put it [[https://youtu.be/-5wpm-gesOY]["What you learn after dealing with time zones, is that what you do is put away from code and you don't try and write anything to deal with this. You look at the people who have been there before you. You look at the first people, the people who have dealt with this before, the people who have built the spagetti code, and you thank them very much for making it open source."]]. Rather than dealing with time zones and calendar changes, the ~pd.to_datetime()~ method and ~pd.DateTime~ class were employed to correctly handle dates.
-*** Storing game object in Data frame
-*** TODO is this really needed?
-I ran into a lot of issues storing a game object within the same data frame as the metadata. The object would be cast to its string representation due to pandas seeing the rest of the data frame as strings. This string representation would just be the original PGN game making it very inefficient to have to prase the game again.
-
-To over come this I stored the game objects with a normal list and made sure to sync the index of the data frame to the corresponding game within the list. As data frame indexing starts at =0= there is not offset. For example, the row of index =7= of the data frame corresponds to game of index =8= within the game list.
-*** Kernel density plots report negative time
-KDE plots apply smoothing to give a continuous and appealing look. Unfortunately this smooths bleeds over to the negative x-axis. This is wrong, move numbers cannot be negative, however, truncating the axis can produce jarring plots.
 #+BEGIN_center
-#+ATTR_LaTeX: :height 0.2\textwidth :center
-[[file:images/KDE negative values.png]]
-#+ATTR_LaTeX: :height 0.2\textwidth :center
-[[file:images/KDE bad smoothing.png]]
+#+attr_org: :width 200
+#+attr_latex: :width 0.4\textwidth :center nil
+[[file:Images/DaenaliaEvandruile_HEATMAP_Pawn_WHITE_EXAMPLE_1_WITH_WRONG_COLOUR.png]]
+#+attr_org: :width 200
+#+attr_latex: :width 0.4\textwidth :center nil
+[[file:Images/_HEATMAP_Pawn_FISC.png]]
+#+END_center
+A similar strategy was employed to ensure the histograms and kernel density plots shared the same axis.
+
+\newpage
+* Results
+#+attr_org: :width 200
+#+attr_latex: :float wrap :width 0.3\textwidth :placement [4]{r}{0.4\textwidth}
+[[file:Images/1920px-Standard_deviation_diagram.png]]
+The skill level of players was assumed to be normally distributed. All ELO grid plots have their ~x-axis~ binned by percentiles from the normal dist. Sigma or \(\sigma\) here denotes one standard deviation cite:NormalDist.
+Date grid plots are binned by quartiles.
+
+** Plot analysis
+*** ELO grid plots
+This first visualisation shows positions where pieces where lost by a particular colour plotted against ELO ranking of the player. Each combination of ELO and piece is represented by an ~8x8~ heat map of the board from Whites perspective. The decision to make all plots from Whites POV was made in an attempt to improve comparability and consistency between plots.
+#+attr_org: :width 200
+#+attr_latex: :float wrap :width 0.5\textwidth :placement [11]{l}{0.6\textwidth}
+#+caption: All captured White pieces binned by ELO
+[[file:Images/_HEATMAP_Queen_Rook_Bishop_Knight_Pawn_WHITE_ELO.png]]
+
+The unique pattern for each piece shows the most common lines played by White.
+
+Queens typically move through the ~C,D,E~ pawns which are the easiest lines out of the starting position.
+#+attr_org: :width 200
+#+attr_latex: :width 100pt
+[[file:Images/Queen lines.png]]
+
+As ELO increases all pieces trend towards the centre as it is a highly advantageous position. The ~A1~ and ~H1~ Rooks (~A8~ and ~H8~ for Black) losses almost disappear in higher ELO's, this is likely due to higher usage, and the utilisation of castling. The highest ELO players show a significant increase in spread of losses indicating that the Rooks are more active through a wider range of centre files.
+The decrease in losses on positions that are common from castling does not indicate a decrease in castling as the heat maps only show losses, as higher ELO players are more likely to play better positions, they are less likely to castle into a position where their Rook will be lost.
+
+A similar spread increase can be seen in the Queens. Higher ELO players tend to lose their Queens in a much more even manner. This may be a symptom of sacrificing which is common in high level play.
+
+Bishops, Knights, and Pawns do not display a pattern change between ELOs suggesting most players know common and effective positioning, likely from watching grand masters. Although there is negligible change in the patterns the frequency at which they are lost becomes more concentrated. This may indicate that higher ELO player are more likely to keep these pieces near positions where they are strongest.
+
+
+A similar plot as ~Figure 1~ is attached in the [[*Appendix][Appendix]] which instead shows Black pieces. There is no not worthy pattern difference between the Black and White plot. All treads are present but with \(180^{\circ}\) rotation.
+
+#+attr_org: :width 200
+#+attr_latex: :width 0.7\textwidth
+#+caption: When White pieces where captured binned by ELO
+[[file:Images/_HIST_Queen_Rook_Bishop_Knight_Pawn_WHITE_ELO.png]]
+
+Here the number of captured pieces is divided by the number of games in the respective bin. This is to account for the differ game counts due to the distribution of players based on ELO.
+
+Although there is a lower number of games in the more extreme percentiles (~col 1~ and ~col 6~) some conclusions can still be drawn.
+A common trend among must all pieces is the gradual spreading effect of pieces lost per game. This is probably due to higher skill players playing longer games.
+There is often a large spike in Pawn losses around move number ~1-6~ demonstrating the trading that is common at the beginning of games while competing for control of the centre of the board. This is corroborated by ~Figure 1~ where the Queen side Pawn is most commonly lost.
+
+Further plots are included in the appendix.
+*** Date grid plots
+A different database was used for date binning as the ~FISC~ database only had games from ~2000~, instead a database comprising of ~Tournaments~, ~Candidates~ ~Interzonals~, and ~World Championships~ games were used. (These games were acquired from [[https://www.pgnmentor.com/files.html#events][PGN mentor]].)
+
+#+attr_org: :width 200
+#+attr_latex: :width 0.7\textwidth
+[[file:Images/_HIST_Queen_Rook_Bishop_Knight_Pawn_WHITE_DATE.png]]
+
+Unfortunately binning by date reveals no interesting patterns or trends. However it does show that chess does not change over the centauries.
+
+Further plots are included in the appendix.
+
+\newpage
+*** Individual piece plots
+Left hand side plots are from the ~FISC~ database. Right hand side from the ~Tournements~ database.
+#+BEGIN_center
+#+attr_org: :width 200
+#+attr_latex: :width 0.45\textwidth :center nil
+[[file:Images/_HEATMAP_Rook_FISC.png]]
+#+attr_latex: :width 0.45\textwidth :center nil
+#+attr_org: :width 200
+[[file:Images/_HEATMAP_Rook_TOURNEMENTS.png]]
 #+END_center
 
-As the negative x-axis being incorrect and misleading I chose to truncate all histogram and KDE plots.
-* Results
-** Plot analysis
+#+BEGIN_center
+#+attr_org: :width 200
+#+attr_latex: :width 0.45\textwidth :center nil
+[[file:Images/_HEATMAP_Queen_FISC.png]]
+#+attr_latex: :width 0.45\textwidth :center nil
+#+attr_org: :width 200
+[[file:Images/_HEATMAP_Queen_TOURNEMENTS.png]]
+#+END_center
+
+As the ~FISC~ database contains a varying skill level players the most prominent trends are those of average skill players. Similar to what was seen in ~Figure 1~. The ~Tournement~ plots clearly exhibit patterns exactly the same as those found in high ELOs in ~Figure 1~ as expected.
+
+These single piece plots help emphasise the individual lines. Interestingly high level players seem to lose their Queens in the same positions regardless of colour. This could be an consequence of [[https://en.wikipedia.org/wiki/First-move_advantage_in_chess][first move advantage]].
+\newpage
+*** Individual player plots
+All previously shown plots are also capable of focusing on a single player. Here we have positions where ~DaenaliaEvandruile~'s Rooks were lostand a histogram of when their Pawns where lost. This allows the user to compare their specific play patterns to common trends.
+
+#+BEGIN_center
+#+attr_org: :width 200
+#+attr_latex: :width 0.45\textwidth :center nil
+[[file:Images/DaenaliaEvandruile_HEATMAP_Rook.png]]
+#+attr_latex: :width 0.45\textwidth :center nil
+#+attr_org: :width 200
+[[file:Images/DaenaliaEvandruile_HIST_Pawn.png]]
+#+END_center
 ** Conclusion
+Overall this project has successfully visualised an uncommon statistic of chess which may provide insight into future trends or an individual players style.
+
+All code and resources used are open source and can be found at [[https://github.com/Jake-Moss/chess-analysis][this repository.]]
+*** Areas for improvement
++ Performance and memory requirements prevent me from analysing the huge databases I hoped to. A custom PGN parse and a rewrite in a lower level language such as Rust or Haskell would allow for this.
++ More positional statistics such as positions that give and receive checks and checkmates may be interesting to visualise. This is very possible with the current implementation requiring only a few more functions due to the features of the ~python-chess~ library.
 * Reflection
-* References
+Due to the complexity and design approach of this project I believe it is deserving of a \(7\). While the ~Date~ binning did not reveal and trends and patterns I initially hope it would it was successful in showing not much changes in chess over the centauries.
+As the program was design in with modularity and composability in mind it is highly general, and able to process any game database format and group based on any meta data field with a few changes. Binning based on location or opening would only require a few lines to group the games and the rest can remain unchanged.
+
+No pre-processioning is required by the user, all plots are not specific to a single database. Everything is self contained making it easy to work with. Analysing another database requires a single filename change.
+While writing this program my goal was not to visualise a single data set but rather to write a tool that achieved that same thing. This added a lot of complexity and time requirements but I believe this was for the best as it forced me to focus on the process itself rather than force a single data set to work for me.
+\newpage
 [[bibliographystyle:plain]]
-[[bibliography:project.bib]]
-#  LocalWords:  PGN
+[[bibliography:./ref.bib]]
+
+* Appendix
+** ELO Grids (FISC)
+#+attr_org: :width 200
+#+attr_latex: :width \textwidth
+[[file:Images/_HEATMAP_Queen_Rook_Bishop_Knight_Pawn_WHITE_ELO.png]]
+
+#+attr_org: :width 200
+#+attr_latex: :width \textwidth
+[[file:Images/_HEATMAP_Queen_Rook_Bishop_Knight_Pawn_BLACK_ELO.png]]
+
+
+#+attr_org: :width 200
+#+attr_latex: :width \textwidth
+[[file:Images/_HIST_Queen_Rook_Bishop_Knight_Pawn_WHITE_ELO.png]]
+
+#+attr_org: :width 200
+#+attr_latex: :width \textwidth
+[[file:Images/_HIST_Queen_Rook_Bishop_Knight_Pawn_BLACK_ELO.png]]
+
+** Date Grids (Tournament)
+#+attr_org: :width 200
+#+attr_latex: :width \textwidth
+[[file:Images/_HEATMAP_Queen_Rook_Bishop_Knight_Pawn_WHITE_DATE.png]]
+
+#+attr_org: :width 200
+#+attr_latex: :width \textwidth
+[[file:Images/_HEATMAP_Queen_Rook_Bishop_Knight_Pawn_BLACK_DATE.png]]
+
+
+#+attr_org: :width 200
+#+attr_latex: :width \textwidth
+[[file:Images/_HIST_Queen_Rook_Bishop_Knight_Pawn_WHITE_DATE.png]]
+
+#+attr_org: :width 200
+#+attr_latex: :width \textwidth
+[[file:Images/_HIST_Queen_Rook_Bishop_Knight_Pawn_BLACK_DATE.png]]
+
+** DaenaliaEvandruile
+#+attr_org: :width 200
+#+attr_latex: :width \textwidth
+[[file:Images/DaenaliaEvandruile_HEATMAP_Queen_Rook_Bishop_Knight_Pawn_WHITE_ELO.png]]
+
+#+attr_org: :width 200
+#+attr_latex: :width \textwidth
+[[file:Images/DaenaliaEvandruile_HEATMAP_Queen_Rook_Bishop_Knight_Pawn_BLACK_ELO.png]]
+
+
+#+attr_org: :width 200
+#+attr_latex: :width \textwidth
+[[file:Images/DaenaliaEvandruile_HIST_Queen_Rook_Bishop_Knight_Pawn_WHITE_ELO.png]]
+
+#+attr_org: :width 200
+#+attr_latex: :width \textwidth
+[[file:Images/DaenaliaEvandruile_HIST_Queen_Rook_Bishop_Knight_Pawn_BLACK_ELO.png]]
+** Individual piece plots
+#+BEGIN_center
+#+attr_org: :width 200
+#+attr_latex: :width 0.4\textwidth :center nil
+[[file:Images/_HEATMAP_Pawn_FISC.png]]
+#+attr_latex: :width 0.4\textwidth :center nil
+#+attr_org: :width 200
+[[file:Images/_HEATMAP_Pawn_TOURNEMENTS.png]]
+#+END_center
+#+BEGIN_center
+#+attr_org: :width 200
+#+attr_latex: :width 0.4\textwidth :center nil
+[[file:Images/_HEATMAP_Bishop_FISC.png]]
+#+attr_latex: :width 0.4\textwidth :center nil
+#+attr_org: :width 200
+[[file:Images/_HEATMAP_Bishop_TOURNEMENTS.png]]
+#+END_center
+#+BEGIN_center
+#+attr_org: :width 200
+#+attr_latex: :width 0.4\textwidth :center nil
+[[file:Images/_HEATMAP_Knight_FISC.png]]
+#+attr_latex: :width 0.4\textwidth :center nil
+#+attr_org: :width 200
+[[file:Images/_HEATMAP_Knight_TOURNEMENTS.png]]
+#+END_center
+#+BEGIN_center
+#+attr_org: :width 200
+#+attr_latex: :width 0.4\textwidth :center nil
+[[file:Images/_HEATMAP_Pawn_FISC.png]]
+#+attr_latex: :width 0.4\textwidth :center nil
+#+attr_org: :width 200
+[[file:Images/_HEATMAP_Pawn_TOURNEMENTS.png]]
+#+END_center
+#+BEGIN_center
+#+attr_org: :width 200
+#+attr_latex: :width 0.4\textwidth :center nil
+[[file:Images/_HEATMAP_Bishop_FISC.png]]
+#+attr_latex: :width 0.4\textwidth :center nil
+#+attr_org: :width 200
+[[file:Images/_HEATMAP_Bishop_TOURNEMENTS.png]]
+#+END_center
+#+BEGIN_center
+#+attr_org: :width 200
+#+attr_latex: :width 0.4\textwidth :center nil
+[[file:Images/_HEATMAP_Knight_FISC.png]]
+#+attr_latex: :width 0.4\textwidth :center nil
+#+attr_org: :width 200
+[[file:Images/_HEATMAP_Knight_TOURNEMENTS.png]]
+#+END_center
+
+#  LocalWords:  PGN ELO

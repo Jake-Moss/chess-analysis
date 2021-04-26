@@ -167,7 +167,7 @@ def normalise(data: np.ndarray) -> Tuple[np.ndarray, float]:
     return normalised, np.max(normalised)
 
 
-def plot_heatmap_grid(dfs: List, pieces: List[int], col_labels: List[str], colour: bool, \
+def plot_heatmap_grid(dfs: List, pieces: List[int], col_labels: List[str], colour: bool, bintype: str, \
                       username: str = "", cmap = sns.diverging_palette(230, 20, as_cmap=True)) \
                       -> Tuple[plt.Figure, np.ndarray]:
 
@@ -198,7 +198,7 @@ def plot_heatmap_grid(dfs: List, pieces: List[int], col_labels: List[str], colou
     global_max = max(local_maxs)
 
     fig, axs = plt.subplots(nrows = grid[0], ncols = grid[1])
-    fig.suptitle("{}{} pieces captured.".format(str(username) + "'s " if username else "",['White', 'Black'][colour]))
+    fig.suptitle("{}{} pieces captured.\nProportion of piece lost on board.".format(str(username) + "'s " if username else "",['Black', 'White'][colour]))
 
     if np.size(axs) == max(grid): # Make types consistence smh matplotlib
         axs = np.reshape(axs, grid)
@@ -223,7 +223,7 @@ def plot_heatmap_grid(dfs: List, pieces: List[int], col_labels: List[str], colou
             )
 
     subplot_matrix_format(axs, grid, [chess.PIECE_NAMES[x].capitalize() for x in pieces], col_labels)
-    fig.savefig(f"./images/{username}_HEATMAP_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}_{['BLACK', 'WHITE'][colour]}.png")
+    fig.savefig(f"./images/{username}_HEATMAP_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}_{['BLACK', 'WHITE'][colour]}_{bintype}.png")
     return fig, axs
 
 
@@ -252,7 +252,7 @@ def plot_heatmap_single_piece(df: pd.DataFrame, pieces: List[int], username: str
     global_max = max(local_maxs)
 
     fig, axs = plt.subplots(nrows = 1, ncols = 2)
-    fig.suptitle("{} {} captured.".format(" and ".join(['Black', 'White']), "s, ".join([chess.PIECE_NAMES[piece].capitalize() for piece in pieces]) + "s"))
+    fig.suptitle("{} {} captured.\nProportion of piece lost on board.".format(" and ".join(['Black', 'White']), "s, ".join([chess.PIECE_NAMES[piece].capitalize() for piece in pieces]) + "s"))
 
     axs = np.reshape(axs, (1, 2))
 
@@ -279,7 +279,7 @@ def plot_heatmap_single_piece(df: pd.DataFrame, pieces: List[int], username: str
     return fig, axs
 
 
-def plot_hist_grid(dfs: List, pieces: List[int], col_labels: List[str], colour: bool, \
+def plot_hist_grid(dfs: List, pieces: List[int], col_labels: List[str], colour: bool, bintype: str,\
                       username: str = "", cmap = sns.diverging_palette(230, 20, as_cmap=True), kde: bool =False) \
                       -> Tuple[plt.Figure, np.ndarray]:
 
@@ -292,6 +292,7 @@ def plot_hist_grid(dfs: List, pieces: List[int], col_labels: List[str], colour: 
     grid = (len(pieces), len(dfs))
 
     local_greatest = []
+    local_maxs = [[] for _ in range(grid[0])]
     data = [[] for _ in range(grid[0])]
     for row in range(grid[0]):
         piece = pieces[row]
@@ -302,10 +303,12 @@ def plot_hist_grid(dfs: List, pieces: List[int], col_labels: List[str], colour: 
                 move_numbers = lost_piece_freq(dfs[col], colour, [piece])
             data[row].append(move_numbers)
             local_greatest.append(np.max(move_numbers) if move_numbers.size != 0 else 0)
+            local_maxs[row].append(np.max(np.bincount(move_numbers))/len(move_numbers) if move_numbers.size != 0 else 0)
 
-    highest_move = max(local_greatest)
+    highest_move = np.quantile(local_greatest, 0.7)
+    global_max = np.max(local_maxs)
     fig, axs = plt.subplots(nrows = grid[0], ncols = grid[1])
-    fig.suptitle("{} {} captured through time.".format(['Black', 'White'][colour], "s, ".join([chess.PIECE_NAMES[piece].capitalize() for piece in pieces]) + "s"))
+    fig.suptitle("{} {} captured through time.\nMove count vs pieces lost per game.".format(['Black', 'White'][colour], " pieces "))
 
     if np.size(axs) == max(grid): # Make types consistence smh matplotlib
         axs = np.reshape(axs, grid)
@@ -317,10 +320,12 @@ def plot_hist_grid(dfs: List, pieces: List[int], col_labels: List[str], colour: 
                     data=data[row][col],
                     ax=axs[row][col],
                     # cmap=cmap,
+                    # common_norm=True,
                     fill=True,
-                    common_norm=True,
+                    bw_adjust=1,
                 )
-                axs[row][col].set_xlim(left=0 ,right=highest_move)
+                axs[row][col].set_xlim(left=0, right=highest_move)
+                axs[row][col].set_ylim(ymin=0, ymax=np.max(local_maxs[row])*1.1)
     else:
         for row in range(grid[0]):
             for col in range(grid[1]):
@@ -328,13 +333,15 @@ def plot_hist_grid(dfs: List, pieces: List[int], col_labels: List[str], colour: 
                     data=data[row][col],
                     ax=axs[row][col],
                     # cmap=cmap,
-                    common_norm=True,
+                    # common_norm=True,
                     binwidth=2,
+                    stat='probability'
                 )
-                axs[row][col].set_xlim(left=0 ,right=highest_move)
+                axs[row][col].set_xlim(left=0, right=highest_move)
+                axs[row][col].set_ylim(ymin=0, ymax=np.max(local_maxs[row])*1.1)
 
     subplot_matrix_format(axs, grid, [chess.PIECE_NAMES[x].capitalize() for x in pieces], col_labels)
-    fig.savefig(f"./images/{username}_{'KDE' if kde else 'HIST'}_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}_{['BLACK', 'WHITE'][colour]}.png")
+    fig.savefig(f"./images/{username}_{'KDE' if kde else 'HIST'}_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}_{['BLACK', 'WHITE'][colour]}_{bintype}.png")
     return fig, axs
 
 
@@ -345,6 +352,7 @@ def plot_hist_single_piece(df: pd.DataFrame, pieces: List[int], \
     col_labels = ["Black", "White"]
 
     local_greatest = []
+    local_maxs = []
     data = []
     for colour in [chess.BLACK, chess.WHITE]:
         if username: # non-empty evals to true
@@ -353,10 +361,11 @@ def plot_hist_single_piece(df: pd.DataFrame, pieces: List[int], \
             move_numbers = lost_piece_freq(df, colour, pieces)
         data.append(move_numbers)
         local_greatest.append(np.max(move_numbers) if move_numbers.size != 0 else 0)
+        local_maxs.append(np.max(np.bincount(move_numbers))/len(move_numbers) if move_numbers.size != 0 else 0)
 
     highest_move = max(local_greatest)
     fig, axs = plt.subplots(nrows = 1, ncols = 2)
-    fig.suptitle("{} {} captured through time.".format(" and ".join(['Black', 'White']), "s, ".join([chess.PIECE_NAMES[piece].capitalize() for piece in pieces]) + "s"))
+    fig.suptitle("{} {} captured through time.\nMove count vs pieces lost per game.".format(" and ".join(['Black', 'White']), "s, ".join([chess.PIECE_NAMES[piece].capitalize() for piece in pieces]) + "s"))
 
     axs = np.reshape(axs, (1, 2))
 
@@ -366,18 +375,20 @@ def plot_hist_single_piece(df: pd.DataFrame, pieces: List[int], \
                 data=data[colour],
                 ax=axs[0][colour],
                 fill=True,
-                common_norm=True,
             )
-            axs[0][colour].set_xlim(left=0 ,right=highest_move)
+            axs[0][colour].set_xlim(left=0, right=highest_move)
+            axs[0][colour].set_ylim(ymin=0, ymax=np.max(local_maxs)*1.1)
     else:
         for colour in [int(chess.BLACK), int(chess.WHITE)]: # see below for reason of werid cast
             sns.histplot(
                 data=data[colour],
                 ax=axs[0][colour],
-                common_norm=True,
+                # palette=cmaps,
                 binwidth=2,
+                stat='probability'
             )
-            axs[0][colour].set_xlim(left=0 ,right=highest_move)
+            axs[0][colour].set_xlim(left=0, right=highest_move)
+            axs[0][colour].set_ylim(ymin=0, ymax=np.max(local_maxs)*1.1)
 
     subplot_matrix_format(axs, (1, 2), [chess.PIECE_NAMES[x].capitalize() for x in pieces], col_labels)
     fig.savefig(f"./images/{username}_{'KDE' if kde else 'HIST'}_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}.png")
