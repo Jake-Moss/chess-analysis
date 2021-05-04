@@ -1,4 +1,8 @@
 #+TITLE: Presentation - Positional analysis of chess games
+#+startup: beamer
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [bigger]
+#+latex_header: \usepackage{xskak, chessboard}
 * Difficulties and issues
 ** Pawn capture on 8th rank
 Some pawn capture heat maps show a capture on the 8th rank (furthest row away from the starting position). According to the FIDE
@@ -27,8 +31,11 @@ def piece_delta(board: chess.Board, count: int, piece_count: Dict[int, int],
     return piece_position # piece id, position, count
 #+end_src
 
-This code block works by making mask of the current board state. This returns a boolean bitboard consisting only of the piece requested.
-#+caption: Piece mask of Black starting pawns
+This code block works by making mask of the current board state. This returns a boolean bitboard consisting only of the piece requested. For example,
+#+begin_src python exports: code results: none
+board.pieces_mask(chess.PAWN, chess.BLACK)
+#+end_src
+#+begin_center
 | / | < |   |   |   |   |   |   | > |
 |---+---+---+---+---+---+---+---+---|
 |   | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
@@ -40,6 +47,13 @@ This code block works by making mask of the current board state. This returns a 
 |   | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 |   | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 |---+---+---+---+---+---+---+---+---|
+#+begin_export latex
+\setchessboard{boardfontsize=15pt}
+\newchessgame
+\showonly{p}
+\chessboard[hideall,showpieces={p},showmover=false]
+#+end_export
+#+end_center
 This is then counted and used as the number of current pieces of the piece type present. As this method only keeps track of the number of pieces on the board at once and relies on the previous state to detect a capture it can be easily broken by a change in the piece count other than a capture. For example promotions, as promotions exchange a pawn in favour of another piece type the piece change is not negative. Although this is accounted for there is still a specific edge case which is not caught.
 
 After a pawn promotes, if it is immediately captured the lost piece is still attributed as a pawn. I was unable to squash this bug.
@@ -48,7 +62,7 @@ In 1918, Russia switched from the Julian calendar to the Gregorian calendar. In 
 
 As Tom Scott put it [[https://youtu.be/-5wpm-gesOY]["What you learn after dealing with time zones, is that what you do is put away from code and you don't try and write anything to deal with this. You look at the people who have been there before you. You look at the first people, the people who have dealt with this before, the people who have built the spagetti code, and you thank them very much for making it open source."]]. Rather than dealing with time zones and calendar changes, the ~pd.to_datetime()~ method and ~pd.DateTime~ class were employed to correctly handle dates.
 ** Performance
-The database used for demonstration here is the ~2000 Standard (all ratings)~ [[https://www.ficsgames.org/download.html][FICS Games Database.]] Coming in at ~134.63MB~ it is the smallest of all the years, and the only one capable of being analysed due to RAM limitation. It has \(3,502,985\) lines and approximately \(100,000\) games. The entire database is ~17GB~, \(452,107,755\) lines, and an unknown number of games.
+The database used for demonstration here is the ~2000 Standard (all ratings)~ [[https://www.ficsgames.org/download.html][FICS Games Database.]] Coming in at ~134.63MB~ it is the smallest of all the years, and the only one capable of being analysed due to RAM limitation. It has \(3,502,985\) lines and approximately \(170,000\) games. The entire database is ~17GB~, \(452,107,755\) lines, and an unknown number of games.
 
 Processing this subset of the database takes approximately ~12min~ and ~15GB~ of RAM, it is a ~12th~ the size of the largest PGN file and ~130x~ smaller than years ~1999~ to ~2020~.
 

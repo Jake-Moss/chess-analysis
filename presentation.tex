@@ -1,0 +1,199 @@
+% Created 2021-05-03 Mon 15:25
+% Intended LaTeX compiler: pdflatex
+\documentclass[bigger]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage{xskak, chessboard}
+
+\usepackage[main,include]{embedall}
+\IfFileExists{./\jobname.org}{\embedfile[desc=The original file]{\jobname.org}}{}
+
+
+
+
+
+\usepackage{fvextra}
+\fvset{
+  commandchars=\\\{\},
+  highlightcolor=white!95!black!80!blue,
+  breaklines=true,
+  breaksymbol=\color{white!60!black}\tiny\ensuremath{\hookrightarrow},
+}
+\renewcommand\theFancyVerbLine{\footnotesize\color{black!40!white}\arabic{FancyVerbLine}}
+
+\usepackage[many]{tcolorbox}
+\DeclareTColorBox[]{Code}{}%
+{enhanced,
+  colback=white!97!black,
+  colframe=white!94!black, boxrule=0.5pt,
+  fontupper=\color{EFD}\footnotesize,
+  arc=2.5pt, outer arc=2.5pt,
+  boxsep=2pt, left=2pt, right=2pt, top=1pt, bottom=0.5pt,
+  breakable}
+
+\definecolor{EFD}{HTML}{383a42}
+\newcommand{\EFD}[1]{\textcolor{EFD}{#1}} % default
+\definecolor{EFk}{HTML}{e45649}
+\newcommand{\EFk}[1]{\textcolor{EFk}{#1}} % font-lock-keyword-face
+\definecolor{EFd}{HTML}{84888b}
+\newcommand{\EFd}[1]{\textcolor{EFd}{\textit{#1}}} % font-lock-doc-face
+\definecolor{EFt}{HTML}{986801}
+\newcommand{\EFt}[1]{\textcolor{EFt}{#1}} % font-lock-type-face
+\definecolor{EFs}{HTML}{50a14f}
+\newcommand{\EFs}[1]{\textcolor{EFs}{#1}} % font-lock-string-face
+\definecolor{EFw}{HTML}{986801}
+\newcommand{\EFw}[1]{\textcolor{EFw}{#1}} % font-lock-warning-face
+\definecolor{EFb}{HTML}{a626a4}
+\newcommand{\EFb}[1]{\textcolor{EFb}{#1}} % font-lock-builtin-face
+\definecolor{EFct}{HTML}{9ca0a4}
+\newcommand{\EFct}[1]{\textcolor{EFct}{#1}} % font-lock-comment-face
+\definecolor{EFc}{HTML}{b751b6}
+\newcommand{\EFc}[1]{\textcolor{EFc}{#1}} % font-lock-constant-face
+\definecolor{EFpp}{HTML}{4078f2}
+\newcommand{\EFpp}[1]{\textcolor{EFpp}{\textbf{#1}}} % font-lock-preprocessor-face
+\definecolor{EFnc}{HTML}{4078f2}
+\newcommand{\EFnc}[1]{\textcolor{EFnc}{\textbf{#1}}} % font-lock-negation-char-face
+\definecolor{EFv}{HTML}{6a1868}
+\newcommand{\EFv}[1]{\textcolor{EFv}{#1}} % font-lock-variable-name-face
+\definecolor{EFf}{HTML}{a626a4}
+\newcommand{\EFf}[1]{\textcolor{EFf}{#1}} % font-lock-function-name-face
+\definecolor{EFcd}{HTML}{9ca0a4}
+\newcommand{\EFcd}[1]{\textcolor{EFcd}{#1}} % font-lock-comment-delimiter-face
+\definecolor{EFrc}{HTML}{4078f2}
+\newcommand{\EFrc}[1]{\textcolor{EFrc}{\textbf{#1}}} % font-lock-regexp-grouping-construct
+\definecolor{EFrb}{HTML}{4078f2}
+\newcommand{\EFrb}[1]{\textcolor{EFrb}{\textbf{#1}}} % font-lock-regexp-grouping-backslash
+\definecolor{EFhn}{HTML}{da8548}
+\newcommand{\EFhn}[1]{\textcolor{EFhn}{\textbf{#1}}} % highlight-numbers-number
+\definecolor{EFhq}{HTML}{4078f2}
+\newcommand{\EFhq}[1]{\textcolor{EFhq}{#1}} % highlight-quoted-quote
+\definecolor{EFhs}{HTML}{986801}
+\newcommand{\EFhs}[1]{\textcolor{EFhs}{#1}} % highlight-quoted-symbol
+\definecolor{EFrdi}{HTML}{4078f2}
+\newcommand{\EFrdi}[1]{\textcolor{EFrdi}{#1}} % rainbow-delimiters-depth-1-face
+\definecolor{EFrdii}{HTML}{a626a4}
+\newcommand{\EFrdii}[1]{\textcolor{EFrdii}{#1}} % rainbow-delimiters-depth-2-face
+\definecolor{EFrdiii}{HTML}{50a14f}
+\newcommand{\EFrdiii}[1]{\textcolor{EFrdiii}{#1}} % rainbow-delimiters-depth-3-face
+\definecolor{EFrdiv}{HTML}{da8548}
+\newcommand{\EFrdiv}[1]{\textcolor{EFrdiv}{#1}} % rainbow-delimiters-depth-4-face
+\definecolor{EFrdv}{HTML}{b751b6}
+\newcommand{\EFrdv}[1]{\textcolor{EFrdv}{#1}} % rainbow-delimiters-depth-5-face
+\definecolor{EFrdvi}{HTML}{986801}
+\newcommand{\EFrdvi}[1]{\textcolor{EFrdvi}{#1}} % rainbow-delimiters-depth-6-face
+\definecolor{EFrdvii}{HTML}{4db5bd}
+\newcommand{\EFrdvii}[1]{\textcolor{EFrdvii}{#1}} % rainbow-delimiters-depth-7-face
+\definecolor{EFrdiix}{HTML}{80a880}
+\newcommand{\EFrdiix}[1]{\textcolor{EFrdiix}{#1}} % rainbow-delimiters-depth-8-face
+\definecolor{EFrdix}{HTML}{887070}
+\newcommand{\EFrdix}[1]{\textcolor{EFrdix}{#1}} % rainbow-delimiters-depth-9-face
+\author{Jake Moss}
+\date{\today}
+\title{Presentation - Positional analysis of chess games}
+\hypersetup{
+ pdfauthor={Jake Moss},
+ pdftitle={Presentation - Positional analysis of chess games},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 28.0.50 (Org mode 9.5)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\section{Difficulties and issues}
+\label{sec:org19efe09}
+\subsection{Pawn capture on 8th rank}
+\label{sec:org2e33045}
+Some pawn capture heat maps show a capture on the 8th rank (furthest row away from the starting position). According to the FIDE
+\begin{quote}
+3.7e) When  a  pawn  reaches  the  rank  furthest  from  its  starting  position  it  must  be  exchanged  as  part  of  the  same  move  on  the  same  square  for  a  new queen,  rook,  bishop  or  knight  of  the  same  colour.  The  player’s  choice  is  not  restricted  to  pieces  that  have  been  captured  previously.  This  exchange  of  a  pawn  for  another  piece  is  called ‘promotion’ and the effect of the new piece is immediate.
+\cite{FIDE}
+\end{quote}
+Thus a pawn can never be captured on the 8th rank.
+
+This bug likely occurs due to how the detection of captures and handling of positions works. While promotions are accounted for there is a specific edge case that persists.
+
+\begin{Code}
+\begin{Verbatim}[]
+\color[HTML]{383a42}\EFk{def} \EFf{piece\_delta}(board: chess.Board, count: \EFb{int}, piece\_count: Dict[\EFb{int}, \EFb{int}],
+                colour: \EFb{bool}) -> \EFv{Tuple}[\EFb{int}, \EFb{int}, \EFb{int}]:
+    piece\_position = (\EFhn{0}, \EFhn{0}, \EFhn{0})
+    \EFk{for} key, value \EFk{in} piece\_count.items():
+        \EFv{current\_count} = \EFb{bin}(board.pieces\_mask(key, colour)).count(\EFs{'1'})
+        \EFk{if} current\_count < \EFv{value}: \EFcd{\# }\EFct{Detects lost based on previous state
+ }           piece\_position = (key, uci\_to\_1d\_array\_index(board.peek().uci()), count)
+            \EFv{piece\_count}[\EFv{key}] = current\_count \EFcd{\# }\EFct{Modify by object-reference
+ }           \EFk{break}
+        \EFk{elif} current\_count > \EFv{value}: \EFcd{\# }\EFct{Accounts for promotion
+ }           piece\_count[\EFv{key}] = current\_count \EFcd{\# }\EFct{Modify by object-reference
+ }           \EFv{piece\_count}[chess.\EFv{PAWN}] = \EFb{bin}(board.pieces\_mask(chess.PAWN, colour)).count(\EFs{'1'})  \EFcd{\# }\EFct{Account for pawn count change
+ }           \EFk{break}
+    \EFk{return} piece\_position \EFcd{\# }\EFct{piece id, position, count}
+\end{Verbatim}
+\end{Code}
+
+This code block works by making mask of the current board state. This returns a boolean bitboard consisting only of the piece requested. For example,
+\begin{Code}
+\begin{Verbatim}[]
+\color[HTML]{383a42}board.pieces\_mask(chess.PAWN, chess.BLACK)
+\end{Verbatim}
+\end{Code}
+\begin{center}
+\begin{center}
+\begin{tabular}{|rrrrrrrr|}
+\hline
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+1 & 1 & 1 & 1 & 1 & 1 & 1 & 1\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+\hline
+\end{tabular}
+\end{center}
+\setchessboard{boardfontsize=15pt}
+\newchessgame
+\showonly{p}
+\chessboard[hideall,showpieces={p},showmover=false]
+\end{center}
+This is then counted and used as the number of current pieces of the piece type present. As this method only keeps track of the number of pieces on the board at once and relies on the previous state to detect a capture it can be easily broken by a change in the piece count other than a capture. For example promotions, as promotions exchange a pawn in favour of another piece type the piece change is not negative. Although this is accounted for there is still a specific edge case which is not caught.
+
+After a pawn promotes, if it is immediately captured the lost piece is still attributed as a pawn. I was unable to squash this bug.
+\subsection{Timezones and my ignorance of them}
+\label{sec:org356e7a9}
+In 1918, Russia switched from the Julian calendar to the Gregorian calendar. In the switch the dates from 1st–13th of February \cite{SovietCalendar}. In doing so breaking any naive date comparison implementation from before the switch to after.
+
+As Tom Scott put it \href{https://youtu.be/-5wpm-gesOY}{``What you learn after dealing with time zones, is that what you do is put away from code and you don't try and write anything to deal with this. You look at the people who have been there before you. You look at the first people, the people who have dealt with this before, the people who have built the spagetti code, and you thank them very much for making it open source.''}. Rather than dealing with time zones and calendar changes, the \texttt{pd.to\_datetime()} method and \texttt{pd.DateTime} class were employed to correctly handle dates.
+\subsection{Performance}
+\label{sec:orgb791e9f}
+The database used for demonstration here is the \texttt{2000 Standard (all ratings)} \href{https://www.ficsgames.org/download.html}{FICS Games Database.} Coming in at \texttt{134.63MB} it is the smallest of all the years, and the only one capable of being analysed due to RAM limitation. It has \(3,502,985\) lines and approximately \(170,000\) games. The entire database is \texttt{17GB}, \(452,107,755\) lines, and an unknown number of games.
+
+Processing this subset of the database takes approximately \texttt{12min} and \texttt{15GB} of RAM, it is a \texttt{12th} the size of the largest PGN file and \texttt{130x} smaller than years \texttt{1999} to \texttt{2020}.
+
+Initially processing speed was a huge concern, taking \texttt{17sec} to load \texttt{1000} games was unacceptable. This was optimised down to \texttt{0.6sec} through smarter garbage collection and vectorisation of the \texttt{game} objects and data frames. Unfortunately this implementation is not \(\text{O}(n)\) and does not scale.
+
+The largest down fall of this program is the hard dependency on \texttt{python-chess}, while an amazing feature full library, it is biggest source of possible optimisation. Note it is \textbf{not} the slowest component, \texttt{pandas dataframes} are notoriously slow. One such optimisation would be a custom game parse that doesn't check move validity (this is not required as it is fair to assume all games follow the rules) in a very high level compiled language such as Haskell, Rust, or C++.
+
+Although the this program is dependent on \texttt{python-chess} it is not dependent on any specific competent of the library that would be unreasonable to port to custom library. This is because it attempts to avoid custom objects and instead favours builtin types. This does add some complexity however it was believed to be the best option.
+
+Optimisation and profiling were conducted through the use of \texttt{cProfile} and \texttt{snakeviz} to see the time taken by each function call.
+\subsection{KDE plots and axes}
+\label{sec:orgb4d4c9a}
+Originally a second KDE plot was produced to provided a visually appealing histogram variant. However as the density calcinations where handled in matplotlibs back-end there was no clean way to standardise the axes. This lead to misleading plots where although everything looked nice, no conclusion could be drawn from these plots. On solution was to set the \texttt{y-max} to 1, while this was an easy fix it produced equivalently unreadable plots due to scaling.
+\newpage
+\end{document}

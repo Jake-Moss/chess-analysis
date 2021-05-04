@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from IPython.core.pylabtools import figsize
 import chess
 import matplotlib.pyplot as plt
 import numpy as np
@@ -123,7 +124,8 @@ def subplot_matrix_format(axs: np.ndarray, grid: Tuple[int, int], pieces_labels:
                     bottom=False,
                     labelleft=False,
                     left=False,
-                    labelrotation=0
+                    labelrotation=0,
+                    labelsize=8,
                 )
                 axs[row][col].xaxis.label.set_visible(False)
                 axs[row][col].yaxis.label.set_visible(False)
@@ -134,6 +136,7 @@ def subplot_matrix_format(axs: np.ndarray, grid: Tuple[int, int], pieces_labels:
                     bottom=True,
                     labelleft=False,
                     left=False,
+                    labelsize=8,
                     labelrotation=0
                 )
                 axs[row][col].xaxis.label.set_visible(True)
@@ -145,6 +148,7 @@ def subplot_matrix_format(axs: np.ndarray, grid: Tuple[int, int], pieces_labels:
                     bottom=False,
                     labelleft=True,
                     left=True,
+                    labelsize=8,
                     labelrotation=0
                 )
                 axs[row][col].xaxis.label.set_visible(False)
@@ -156,6 +160,7 @@ def subplot_matrix_format(axs: np.ndarray, grid: Tuple[int, int], pieces_labels:
                     bottom=True,
                     labelleft=True,
                     left=True,
+                    labelsize=8,
                     labelrotation=0
                 )
                 axs[row][col].xaxis.label.set_visible(True)
@@ -197,15 +202,15 @@ def plot_heatmap_grid(dfs: List, pieces: List[int], col_labels: List[str], colou
 
     global_max = max(local_maxs)
 
-    fig, axs = plt.subplots(nrows = grid[0], ncols = grid[1])
-    fig.suptitle("{}{} pieces captured.\nProportion of piece lost on board.".format(str(username) + "'s " if username else "",['Black', 'White'][colour]))
+    fig, axs = plt.subplots(nrows = grid[0], ncols = grid[1], figsize=(10, 8))
+    fig.suptitle("{}{} pieces captured.\nProportion of piece lost on board.\nBinned by ELO range.".format(str(username) + "'s " if username else "",['Black', 'White'][colour]))
 
     if np.size(axs) == max(grid): # Make types consistence smh matplotlib
         axs = np.reshape(axs, grid)
 
-    fig.subplots_adjust(right=0.8)
+    fig.subplots_adjust(right=0.83, wspace = 0.2, hspace = 0.2, left=0.05)
 
-    cbar_ax = fig.add_axes([0.85, 0.15, 0.03, 0.7])
+    cbar_ax = fig.add_axes([0.88, 0.15, 0.03, 0.7])
 
     for row in range(grid[0]):
         for col in range(grid[1]):
@@ -223,7 +228,7 @@ def plot_heatmap_grid(dfs: List, pieces: List[int], col_labels: List[str], colou
             )
 
     subplot_matrix_format(axs, grid, [chess.PIECE_NAMES[x].capitalize() for x in pieces], col_labels)
-    fig.savefig(f"./images/{username}_HEATMAP_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}_{['BLACK', 'WHITE'][colour]}_{bintype}.png")
+    fig.savefig(f"./images/{username}_HEATMAP_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}_{['BLACK', 'WHITE'][colour]}_{bintype}.png", bbox_inches='tight')
     return fig, axs
 
 
@@ -256,9 +261,9 @@ def plot_heatmap_single_piece(df: pd.DataFrame, pieces: List[int], username: str
 
     axs = np.reshape(axs, (1, 2))
 
-    fig.subplots_adjust(right=0.8)
+    fig.subplots_adjust(right=0.8, bottom=0.410)
 
-    cbar_ax = fig.add_axes([0.85, 0.15, 0.03, 0.7])
+    cbar_ax = fig.add_axes([0.85, 0.35, 0.03, 0.60])
 
     for colour in [int(chess.BLACK), int(chess.WHITE)]: # see below for reason of werid cast
         sns.heatmap(
@@ -275,7 +280,7 @@ def plot_heatmap_single_piece(df: pd.DataFrame, pieces: List[int], username: str
         )
 
     subplot_matrix_format(axs, (1, 2), [chess.PIECE_NAMES[piece].capitalize() for piece in pieces], col_labels)
-    fig.savefig(f"./images/{username}_HEATMAP_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}.png")
+    fig.savefig(f"./images/{username}_HEATMAP_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}.png", bbox_inches='tight')
     return fig, axs
 
 
@@ -302,13 +307,13 @@ def plot_hist_grid(dfs: List, pieces: List[int], col_labels: List[str], colour: 
             else:
                 move_numbers = lost_piece_freq(dfs[col], colour, [piece])
             data[row].append(move_numbers)
-            local_greatest.append(np.max(move_numbers) if move_numbers.size != 0 else 0)
+            local_greatest.append(np.average(move_numbers) + np.std(move_numbers)*3 if move_numbers.size != 0 else 0)
             local_maxs[row].append(np.max(np.bincount(move_numbers))/len(move_numbers) if move_numbers.size != 0 else 0)
 
-    highest_move = np.quantile(local_greatest, 0.7)
-    global_max = np.max(local_maxs)
-    fig, axs = plt.subplots(nrows = grid[0], ncols = grid[1])
-    fig.suptitle("{} {} captured through time.\nMove count vs pieces lost per game.".format(['Black', 'White'][colour], " pieces "))
+    # highest_move = np.quantile(local_greatest, 0.7)
+    highest_move = np.max(local_greatest)
+    fig, axs = plt.subplots(nrows = grid[0], ncols = grid[1], figsize=(10, 8))
+    fig.suptitle("{} {} captured through time.\nMove count vs pieces lost per game.\nBinned by date range.".format(['Black', 'White'][colour], " pieces "))
 
     if np.size(axs) == max(grid): # Make types consistence smh matplotlib
         axs = np.reshape(axs, grid)
@@ -341,7 +346,7 @@ def plot_hist_grid(dfs: List, pieces: List[int], col_labels: List[str], colour: 
                 axs[row][col].set_ylim(ymin=0, ymax=np.max(local_maxs[row])*1.1)
 
     subplot_matrix_format(axs, grid, [chess.PIECE_NAMES[x].capitalize() for x in pieces], col_labels)
-    fig.savefig(f"./images/{username}_{'KDE' if kde else 'HIST'}_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}_{['BLACK', 'WHITE'][colour]}_{bintype}.png")
+    fig.savefig(f"./images/{username}_{'KDE' if kde else 'HIST'}_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}_{['BLACK', 'WHITE'][colour]}_{bintype}.png", bbox_inches='tight')
     return fig, axs
 
 
@@ -360,10 +365,10 @@ def plot_hist_single_piece(df: pd.DataFrame, pieces: List[int], \
         else:
             move_numbers = lost_piece_freq(df, colour, pieces)
         data.append(move_numbers)
-        local_greatest.append(np.max(move_numbers) if move_numbers.size != 0 else 0)
+        local_greatest.append(np.average(move_numbers) + np.std(move_numbers)*4 if move_numbers.size != 0 else 0)
         local_maxs.append(np.max(np.bincount(move_numbers))/len(move_numbers) if move_numbers.size != 0 else 0)
 
-    highest_move = max(local_greatest)
+    highest_move = np.max(local_greatest)
     fig, axs = plt.subplots(nrows = 1, ncols = 2)
     fig.suptitle("{} {} captured through time.\nMove count vs pieces lost per game.".format(" and ".join(['Black', 'White']), "s, ".join([chess.PIECE_NAMES[piece].capitalize() for piece in pieces]) + "s"))
 
@@ -391,5 +396,5 @@ def plot_hist_single_piece(df: pd.DataFrame, pieces: List[int], \
             axs[0][colour].set_ylim(ymin=0, ymax=np.max(local_maxs)*1.1)
 
     subplot_matrix_format(axs, (1, 2), [chess.PIECE_NAMES[x].capitalize() for x in pieces], col_labels)
-    fig.savefig(f"./images/{username}_{'KDE' if kde else 'HIST'}_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}.png")
+    fig.savefig(f"./images/{username}_{'KDE' if kde else 'HIST'}_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}.png", bbox_inches='tight')
     return fig, axs

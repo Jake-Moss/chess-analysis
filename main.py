@@ -52,24 +52,25 @@ def main():
     # pieces = [chess.ROOK, chess.KNIGHT]
     pieces = list(chess.PIECE_TYPES)[:-1][::-1]
 
-    # Type casting and filtering
+    # Type casting and filsimilar to others surrounding it. If objects are atering
     df_elo = df[df["WhiteElo"].apply(lambda x: x not in ["", "?", None, np.nan]) & \
                 df["BlackElo"].apply(lambda x: x not in ["", "?", None, np.nan])]  \
                 .astype({"WhiteElo": 'int', "BlackElo": 'int'}) # type casts elo to ints and filters out the various non-int things
     df["Date"] = pd.to_datetime(df["Date"].apply(lambda x: x.replace("?", "")[:4].replace(".", ""))) # type cast dates to dates, assumes year is present in all data
 
-    plt.rcParams['figure.figsize'] = (8, 7)
+    # plt.rcParams['figure.figsize'] = (10, 8)
+    plt.rcParams.update({'font.size': 14})
 
-    # # ELO
-    # minimum, low, low_mid, mid, mid_high, high, maximum = df_elo["WhiteElo"].quantile([0, 0.028, 0.1587, 0.5, 0.8413, 0.9772, 1])
-    # bins_ranges = [minimum, low, low_mid, mid, mid_high, high, maximum]
-    # bins = []
-    # col_labels = []
-    # for lower, upper in zip(bins_ranges[:-1], bins_ranges[1:]):
-    #     print(f"Elo in range {lower:.0f}-{upper:.0f}")
-    #     bins.append(df_elo[in_range(lower, df_elo["WhiteElo"], upper)])
-    #     col_labels.append(f"Elo in range\n{lower:.0f}-{upper:.0f}\n{len(bins)-4 if len(bins) != 1 else '-inf'}σ-{len(bins)-3 if len(bins) != 6 else 'inf'}σ")
-    # bintype = "ELO"
+    # ELO
+    minimum, low, low_mid, mid, mid_high, high, maximum = df_elo["WhiteElo"].quantile([0, 0.028, 0.1587, 0.5, 0.8413, 0.9772, 1])
+    bins_ranges = [minimum, low, low_mid, mid, mid_high, high, maximum]
+    bins = []
+    col_labels = []
+    for lower, upper in zip(bins_ranges[:-1], bins_ranges[1:]):
+        print(f"Elo in range {lower:.0f}-{upper:.0f}")
+        bins.append(df_elo[in_range(lower, df_elo["WhiteElo"], upper)])
+        col_labels.append(f"{lower:.0f} - {upper:.0f}\n{len(bins)-4 if len(bins) != 1 else '-∞'}σ to {len(bins)-3 if len(bins) != 6 else '∞'}σ")
+    bintype = "ELO"
 
 
     # fig, axs = plot_heatmap_grid(bins, pieces, col_labels, chess.BLACK, bintype, username="DaenaliaEvandruile")
@@ -84,8 +85,6 @@ def main():
     # fig, axs = plot_hist_grid(bins, pieces, col_labels, chess.BLACK, bintype)
     # fig, axs = plot_hist_grid(bins, pieces, col_labels, chess.WHITE, bintype)
 
-
-
     # # DATE
     # minimum, low, mid, high, maximum = df["Date"].quantile([0, 0.25, 0.5, 0.75, 1])
     # bins_ranges = [minimum, low, mid, high, maximum]
@@ -96,7 +95,7 @@ def main():
     # for lower, upper in zip(bins_ranges[:-1], bins_ranges[1:]):
     #     print(f"Date in range {lower.year}-{upper.year}")
     #     bins.append(df[in_range(lower, df["Date"], upper)])
-    #     col_labels.append(f"Date in range\n{lower.year} to {upper.year}\nQ{len(bins)-1}-Q{len(bins)}")
+    #     col_labels.append(f"{lower.year} to {upper.year}\nQ{len(bins)-1} - Q{len(bins)}")
     # bintype = "DATE"
 
     # fig, axs = plot_heatmap_grid(bins, pieces, col_labels, chess.BLACK, bintype, username="DaenaliaEvandruile")
@@ -116,7 +115,7 @@ def main():
 
 
 
-    # fig, axs = plot_heatmap_single_piece(df, [chess.PAWN], username="DaenaliaEvandruile")
+    fig, axs = plot_heatmap_single_piece(df, [chess.PAWN], username="DaenaliaEvandruile", cmap=sns.color_palette("viridis", as_cmap=True))
     # fig, axs = plot_heatmap_single_piece(df, [chess.PAWN], bintype)
 
     # for piece in chess.PIECE_TYPES[:-1]:
@@ -137,6 +136,3 @@ def main():
 
 if __name__ == "__main__":
     df, games = main()
-
-# def animate(i):
-#     fig, axs = plot_heatmap_grid(bins, pieces, col_labels, chess.BLACK)
