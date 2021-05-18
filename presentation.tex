@@ -1,6 +1,6 @@
-% Created 2021-05-03 Mon 15:25
+% Created 2021-05-07 Fri 15:06
 % Intended LaTeX compiler: pdflatex
-\documentclass[bigger]{beamer}
+\documentclass[presentation, 8pt]{beamer}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{graphicx}
@@ -98,6 +98,7 @@
 \newcommand{\EFrdiix}[1]{\textcolor{EFrdiix}{#1}} % rainbow-delimiters-depth-8-face
 \definecolor{EFrdix}{HTML}{887070}
 \newcommand{\EFrdix}[1]{\textcolor{EFrdix}{#1}} % rainbow-delimiters-depth-9-face
+\usetheme{default}
 \author{Jake Moss}
 \date{\today}
 \title{Presentation - Positional analysis of chess games}
@@ -111,22 +112,54 @@
 \begin{document}
 
 \maketitle
-\tableofcontents
+\section{Plot analysis}
+\label{sec:org95fd096}
+\begin{frame}[label={sec:org0dc23d0}]{Heat map grid}
+\begin{center}
+\includegraphics[width=.9\linewidth]{Images/_HEATMAP_Queen_Rook_Bishop_Knight_Pawn_WHITE_ELO_FISC.png}
+\end{center}
+\end{frame}
+\begin{frame}[label={sec:org655b225}]{Head map single}
+\begin{center}
+\includegraphics[width=.9\linewidth]{Images/_HEATMAP_Knight_FISC.png}
+\end{center}
+\end{frame}
+\begin{frame}[label={sec:org12eb09a}]{Histogram grid}
+\begin{center}
+\includegraphics[width=.9\linewidth]{Images/_HIST_Queen_Rook_Bishop_Knight_Pawn_WHITE_ELO_FISC.png}
+\end{center}
+\end{frame}
+\begin{frame}[label={sec:orgc382499}]{Histogram single}
+\begin{center}
+\includegraphics[width=.9\linewidth]{Images/_HIST_Pawn_FISC.png}
+\end{center}
+\end{frame}
+\begin{frame}[label={sec:org24ac06d}]{Date based plots}
+\begin{center}
+\includegraphics[width=.9\linewidth]{Images/_HEATMAP_Queen_Rook_Bishop_Knight_Pawn_BLACK_DATE_TOURNEMENTS.png}
+\end{center}
+\end{frame}
+\begin{frame}[label={sec:orgd367c01}]{Date based plots}
+\begin{center}
+\includegraphics[width=.9\linewidth]{Images/_HIST_Queen_Rook_Bishop_Knight_Pawn_BLACK_DATE_TOURNEMENTS.png}
+\end{center}
+\end{frame}
 
 \section{Difficulties and issues}
-\label{sec:org19efe09}
-\subsection{Pawn capture on 8th rank}
-\label{sec:org2e33045}
-Some pawn capture heat maps show a capture on the 8th rank (furthest row away from the starting position). According to the FIDE
+\label{sec:org6796e7c}
+\begin{frame}[label={sec:org8f90311}]{Pawn capture on 8th rank}
+\begin{center}
+\includegraphics[width=.9\linewidth]{Images/Pawn on 8th rank.png}
+\end{center}
+\end{frame}
+\begin{frame}[label={sec:orgbdbcd23}]{Pawn capture on 8th rank}
 \begin{quote}
 3.7e) When  a  pawn  reaches  the  rank  furthest  from  its  starting  position  it  must  be  exchanged  as  part  of  the  same  move  on  the  same  square  for  a  new queen,  rook,  bishop  or  knight  of  the  same  colour.  The  player’s  choice  is  not  restricted  to  pieces  that  have  been  captured  previously.  This  exchange  of  a  pawn  for  another  piece  is  called ‘promotion’ and the effect of the new piece is immediate.
-\cite{FIDE}
 \end{quote}
-Thus a pawn can never be captured on the 8th rank.
-
-This bug likely occurs due to how the detection of captures and handling of positions works. While promotions are accounted for there is a specific edge case that persists.
-
-\begin{Code}
+\href{https://www.fide.com/FIDE/handbook/LawsOfChess.pdf}{Source: FIDE Laws of chess}
+\end{frame}
+\begin{frame}[label={sec:org78a0683},fragile]{Bug location}
+ \begin{Code}
 \begin{Verbatim}[]
 \color[HTML]{383a42}\EFk{def} \EFf{piece\_delta}(board: chess.Board, count: \EFb{int}, piece\_count: Dict[\EFb{int}, \EFb{int}],
                 colour: \EFb{bool}) -> \EFv{Tuple}[\EFb{int}, \EFb{int}, \EFb{int}]:
@@ -144,14 +177,16 @@ This bug likely occurs due to how the detection of captures and handling of posi
     \EFk{return} piece\_position \EFcd{\# }\EFct{piece id, position, count}
 \end{Verbatim}
 \end{Code}
-
-This code block works by making mask of the current board state. This returns a boolean bitboard consisting only of the piece requested. For example,
-\begin{Code}
+\end{frame}
+\begin{frame}[label={sec:orgc37f8f6},fragile]{Bug location}
+ \begin{Code}
 \begin{Verbatim}[]
 \color[HTML]{383a42}board.pieces\_mask(chess.PAWN, chess.BLACK)
 \end{Verbatim}
 \end{Code}
-\begin{center}
+\begin{columns}
+\begin{column}{0.45\columnwidth}
+\begin{block}{Data structure}
 \begin{center}
 \begin{tabular}{|rrrrrrrr|}
 \hline
@@ -166,34 +201,152 @@ This code block works by making mask of the current board state. This returns a 
 \hline
 \end{tabular}
 \end{center}
+\end{block}
+\end{column}
+\begin{column}{0.45\columnwidth}
+\begin{block}{Board}
 \setchessboard{boardfontsize=15pt}
 \newchessgame
 \showonly{p}
 \chessboard[hideall,showpieces={p},showmover=false]
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+\begin{frame}[label={sec:org1ba6897}]{Culprit}
+\begin{columns}
+\begin{column}{0.45\columnwidth}
+\begin{block}{Inital state}
+\begin{center}
+\includegraphics[width=.9\linewidth]{Images/Pawn capture 8th rank.png}
 \end{center}
-This is then counted and used as the number of current pieces of the piece type present. As this method only keeps track of the number of pieces on the board at once and relies on the previous state to detect a capture it can be easily broken by a change in the piece count other than a capture. For example promotions, as promotions exchange a pawn in favour of another piece type the piece change is not negative. Although this is accounted for there is still a specific edge case which is not caught.
+\end{block}
+\end{column}
+\begin{column}{0.45\columnwidth}
+\begin{block}{Final state}
+\begin{center}
+\includegraphics[width=.9\linewidth]{Images/pawn promote 8th rank.png}
+\end{center}
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+\begin{frame}[label={sec:org79ba730}]{Timezones}
+\begin{center}
+\includegraphics[width=.9\linewidth]{Images/Gregorian-calendar-large.jpg}
+\end{center}
+\url{https://www.familytreemagazine.com/wp-content/uploads/2018/10/Gregorian-calendar-large.jpg?x73159}
+\end{frame}
+\section{Performance}
+\label{sec:org7b4d0a2}
+\begin{frame}[label={sec:org8ff19ae},fragile]{Performance}
+ \begin{columns}
+\begin{column}{0.45\columnwidth}
+\begin{block}{FISC}
+\begin{Code}
+\begin{Verbatim}[]
+\color[HTML]{383a42}\$ wc -l *
+    \EFhn{3502985} ficsgamesdb\_2000.pgn
+    ...
+   \EFhn{11126076} ficsgamesdb\_2020.pgn
+  \EFhn{452107755} total
 
-After a pawn promotes, if it is immediately captured the lost piece is still attributed as a pawn. I was unable to squash this bug.
-\subsection{Timezones and my ignorance of them}
-\label{sec:org356e7a9}
-In 1918, Russia switched from the Julian calendar to the Gregorian calendar. In the switch the dates from 1st–13th of February \cite{SovietCalendar}. In doing so breaking any naive date comparison implementation from before the switch to after.
+\$ du -h ./
+17G
 
-As Tom Scott put it \href{https://youtu.be/-5wpm-gesOY}{``What you learn after dealing with time zones, is that what you do is put away from code and you don't try and write anything to deal with this. You look at the people who have been there before you. You look at the first people, the people who have dealt with this before, the people who have built the spagetti code, and you thank them very much for making it open source.''}. Rather than dealing with time zones and calendar changes, the \texttt{pd.to\_datetime()} method and \texttt{pd.DateTime} class were employed to correctly handle dates.
-\subsection{Performance}
-\label{sec:orgb791e9f}
-The database used for demonstration here is the \texttt{2000 Standard (all ratings)} \href{https://www.ficsgames.org/download.html}{FICS Games Database.} Coming in at \texttt{134.63MB} it is the smallest of all the years, and the only one capable of being analysed due to RAM limitation. It has \(3,502,985\) lines and approximately \(170,000\) games. The entire database is \texttt{17GB}, \(452,107,755\) lines, and an unknown number of games.
+\$ \textcolor[HTML]{986801}{ls} | wc -l
+\EFhn{21}
+\end{Verbatim}
+\end{Code}
+\end{block}
+\end{column}
 
-Processing this subset of the database takes approximately \texttt{12min} and \texttt{15GB} of RAM, it is a \texttt{12th} the size of the largest PGN file and \texttt{130x} smaller than years \texttt{1999} to \texttt{2020}.
+\begin{column}{0.45\columnwidth}
+\begin{block}{Tournements}
+\begin{Code}
+\begin{Verbatim}[]
+\color[HTML]{383a42}\$ wc -l *
+     \EFhn{178} Aachen1868.pgn
+     ...
+    \EFhn{1196} Zurich2015.pgn
+ \EFhn{1786360} total
 
-Initially processing speed was a huge concern, taking \texttt{17sec} to load \texttt{1000} games was unacceptable. This was optimised down to \texttt{0.6sec} through smarter garbage collection and vectorisation of the \texttt{game} objects and data frames. Unfortunately this implementation is not \(\text{O}(n)\) and does not scale.
+\$ du -h ./
+64M
 
-The largest down fall of this program is the hard dependency on \texttt{python-chess}, while an amazing feature full library, it is biggest source of possible optimisation. Note it is \textbf{not} the slowest component, \texttt{pandas dataframes} are notoriously slow. One such optimisation would be a custom game parse that doesn't check move validity (this is not required as it is fair to assume all games follow the rules) in a very high level compiled language such as Haskell, Rust, or C++.
+\$ \textcolor[HTML]{986801}{ls} | wc -l
+\EFhn{1059}
+\end{Verbatim}
+\end{Code}
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
 
-Although the this program is dependent on \texttt{python-chess} it is not dependent on any specific competent of the library that would be unreasonable to port to custom library. This is because it attempts to avoid custom objects and instead favours builtin types. This does add some complexity however it was believed to be the best option.
+\begin{frame}[label={sec:orge448228}]{Profiling}
+\begin{center}
+\includegraphics[width=.9\linewidth]{Images/Profiling.png}
+\end{center}
+\end{frame}
+\section{Improvements}
+\label{sec:orgce9dad3}
+\begin{frame}[label={sec:org1b2dd5b}]{Evaluation of positions using engines}
+\begin{block}{\href{https://www.scitepress.org/papers/2018/65355/65355.pdf}{Learning to Evaluate Chess Positions with Deep Neural Networks and Limited Look ahead}}
+\begin{quote}
+\ldots{}We collect around 3,000,000 different chess positions played by highly skilled chess players and label them with the evaluation function of Stockfish, one of the strongest existing chess engines. We create 4 different datasets from scratch that are used for different classification and regression experiments. \ldots{}
+\end{quote}
+\href{https://doi.org/10.5220/0006535502760283}{doi:10.5220/0006535502760283}
+\end{block}
+\end{frame}
+\begin{frame}[label={sec:orgf4bc73b},fragile]{Popular chess engines}
+ \begin{itemize}
+\item Stockfish
+\begin{itemize}
+\item Strongest currently
+\item Traditional
+\item FOSS
+\end{itemize}
+\item Leela Chess Zero
+\begin{itemize}
+\item Self-taught through reinforcement learning and repeated self-play
+\item FOSS
+\end{itemize}
+\item AlphaZero
+\begin{itemize}
+\item First engine to use reinforcement learning and self-play
+\item Propriety
+\end{itemize}
+\item Komodo
+\begin{itemize}
+\item Propriety
+\item Used by \texttt{Chess.com} for it's celebrity bots
+\end{itemize}
+\end{itemize}
+\end{frame}
+\section{Failed plots}
+\label{sec:orgd71e8c6}
+\begin{frame}[label={sec:org17b5ade}]{KDE plots}
+\begin{center}
+\includegraphics[width=.9\linewidth]{Images/failed kde.png}
+\end{center}
+\end{frame}
 
-Optimisation and profiling were conducted through the use of \texttt{cProfile} and \texttt{snakeviz} to see the time taken by each function call.
-\subsection{KDE plots and axes}
-\label{sec:orgb4d4c9a}
-Originally a second KDE plot was produced to provided a visually appealing histogram variant. However as the density calcinations where handled in matplotlibs back-end there was no clean way to standardise the axes. This lead to misleading plots where although everything looked nice, no conclusion could be drawn from these plots. On solution was to set the \texttt{y-max} to 1, while this was an easy fix it produced equivalently unreadable plots due to scaling.
-\newpage
+\section{Final words}
+\label{sec:org01bddf1}
+\begin{frame}[label={sec:orgfc4cb1a}]{Final words}
+Source code: \url{https://github.com/Jake-Moss/chess-analysis}
+
+Additions:
+\begin{center}
+\includegraphics[width=.9\linewidth]{Images/Additions.png}
+\end{center}
+Deletions:
+\begin{center}
+\includegraphics[width=.9\linewidth]{Images/Deletions.png}
+\end{center}
+
+Broke git once on Mar 7, 2021.
+
+Everything was written in Emacs.
+\end{frame}
 \end{document}

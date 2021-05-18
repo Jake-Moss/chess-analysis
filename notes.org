@@ -1,0 +1,78 @@
+#+TITLE: Presentation notes
+
+* Plot analysis
+Within the last year chess has seen a huge popularity boost due to the hit tv show Queens Gambit along side the growth of many chess streamers. With this growth comes an abundance of chess statistics and game analysis. The goal of this project was to provided a new angle on positional analysis and visualise piece trends in a unique way.
+
+To do this I produced 2 main plots, Heatmap and histogram, each with 5 variations, colour, Elo, date, single piece, or single player. The main plot of interest is the Heatmap grid. My goal when creating this plot was to show the differences in piece positions over ELO and time indicated by where pieces were lost.
+
+Here each squares colour represents the proportion of that piece lost of that type in that binning. The colour bar is then normalised to the maximum of all squares to make the colouring consistent and comparable.
+
+Mirroring the board so that it is from players POV would require superimposing Black games on White games, making it difficult to compare as the board is not symmetrical. This would not improve the comparability anyway and instead lead to misleading data.
+
+For ELO based plots, the x axis was binned based on the standard deviations of the ELOs, it was assumed that player rankings are normally distributed.
+
+This plot does a great job of visualising the common positions of pieces and the patterns they move in.
+
+The single piece plots are best for demonstrating the differences in play between the Black and White games. All heat maps are from Whites POV.
+
+
+Histograms were used to represent when pieces were captured. The x axis for all plots is normalised to 3 standard deviations from the mean of the highest move count in each game. The y axis however it not normalised globally, instead it is shared by each row as comparing 8 pawns to 1 queen is not a fair comparison.
+
+An interesting trend within is the gradual flattening of the curve as ELO rising, this indicates that high ranking players play longer games. All pieces follow the same general trend except Pawns, who have a large spike at the start of the game develop as ELO increase. This occurs when  players fight over central control.
+
+Binning based on dates was done using quartiles. Unfortunately these plots do not show significant trends.
+
+All plots shown have the ability to be filter to a single player.
+
+* Difficulties and issues
+** Pawn capture on 8th rank
+One of the issues I ran into was a pawn capture on the 8th rank.
+
+An example is shown here by the tiny colour difference of the 1 BCD squares.
+
+According to the FIDE
+
+#+begin_quote
+3.7e) When  a  pawn  reaches  the  rank  furthest  from  its  starting  position  it  must  be  exchanged  as  part  of  the  same  move  on  the  same  square  for  a  new queen,  rook,  bishop  or  knight  of  the  same  colour.  The  player’s  choice  is  not  restricted  to  pieces  that  have  been  captured  previously.  This  exchange  of  a  pawn  for  another  piece  is  called ‘promotion’ and the effect of the new piece is immediate.
+cite:FIDE
+#+end_quote
+Thus a pawn can never be captured on the 8th rank.
+
+This bug likely occurs due to how the detection of captures and handling of position. While promotions are accounted for I thought a specific edge case persisted.
+
+This code block works by making mask of the current board state. This returns a boolean bitboard consisting only of the piece requested. For example,
+
+This is then counted and used as the number of current pieces of the piece type present. As this method only keeps track of the number of pieces on the board at once and relies on the previous state to detect a capture it can be easily broken by a change in the piece count other than a capture. For example promotions, as promotions exchange a pawn in favour of another piece type the piece change is not negative. Although this is accounted for there is still a specific edge case which is not caught.
+
+I believe it to be something like this. Where a pawn captures and promotes, and is then captured.
+
+However in 2007 FIDE change the rules to specify that a pawn cannot promote to another pawn. So before then it was possible for a pawn to be captured on the 8th rank, however I was unable to track down a specific game in my database.
+** Timezones and my ignorance of them
+In 1918, Russia switched from the Julian calendar to the Gregorian calendar. In the switch the dates from 1st–13th of February were lost. In doing so breaking any naive date comparison implementation from before the switch to after.
+
+As Tom Scott put it [[https://youtu.be/-5wpm-gesOY]["What you learn after dealing with time zones, is that what you do is put away from code and you don't try and write anything to deal with this. You look at the people who have been there before you and you thank them very much for making it open source."]]. Rather than dealing with time zones and calendar changes, the ~pd.to_datetime()~ method and ~pd.DateTime~ class were employed to correctly handle dates.
+** Performance
+The database used for demonstration here is subset of the FISC database, which is 17GB and 450 million lines. Specifically the ~2000 Standard (all ratings)~ [[https://www.ficsgames.org/download.html][FICS Games Database.]] Coming in at ~134.63MB~ it is the smallest of all the years, and the only one capable of being analysed due to RAM limitation. It has \(3,502,985\) lines and approximately \(170,000\) games.
+
+Processing this subset of the database takes approximately ~12min~ and ~15GB~ of RAM, it is a ~12th~ the size of the largest PGN file and ~130x~ smaller than years ~1999~ to ~2020~.
+
+Initially processing speed was a huge concern, taking ~17sec~ to load ~1000~ games was unacceptable. This was optimised down to ~0.6sec~ through smarter garbage collection and vectorisation of the ~game~ objects and data frames. Unfortunately this implementation is not \(\text{O}(n)\) and does not scale.
+
+The largest down fall of this program is the hard dependency on ~python-chess~, while an amazing feature full library, it is biggest source of possible optimisation. One such optimisation would be a custom game parse that doesn't check move validity (this is not required as it is fair to assume all games follow the rules) in a compiled language such as Haskell, Rust, or C++.
+
+Although the this program is dependent on ~python-chess~ it is not dependent on any specific competent of the library that would be unreasonable to port to custom library. This is because it attempts to avoid custom objects and instead favours builtin types. This does add some complexity however I believed to be the best option.
+
+Optimisation and profiling were conducted through the use of ~cProfile~ and ~snakeviz~. One such profile can be see here.
+** Improvements and alternative plots
+Another possible project would be to evaluate board states through time using an engine. This could show a difference between the average strength of a position between centauries.
+
+Some popular engine are Stockfish, Leela, alpha zero, and komodo.
+
+** KDE plots and axes
+Originally a second KDE plot was produced to provided a visually appealing histogram variant. However as the density calcinations where handled in matplotlibs back-end so there was no clean way to standardise the axes. This lead to misleading plots where although everything looked nice, no conclusion could be drawn as there are not comparable. On solution was to set the ~y-max~ to 1, while this was an easy fix it produced unreadable plots due to scaling.
+
+** Final notes
+Throughout this project I made 1.3 million additions, and 650 thousand deletions, and broke git once.
+Both the report and this presentation were written in Emacs Org mode and then exported to latex.
+
+Thank you for your time.

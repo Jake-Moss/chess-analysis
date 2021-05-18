@@ -5,26 +5,26 @@
                      '(("article" "11pt")))
    (TeX-add-to-alist 'LaTeX-provided-package-options
                      '(("inputenc" "utf8") ("fontenc" "T1") ("ulem" "normalem") ("geometry" "top=1in" "bottom=1.25in" "left=1.25in" "right=1.25in") ("embedall" "main" "include") ("tcolorbox" "many")))
-   (add-to-list 'LaTeX-verbatim-environments-local "Verbatim")
-   (add-to-list 'LaTeX-verbatim-environments-local "Verbatim*")
-   (add-to-list 'LaTeX-verbatim-environments-local "BVerbatim")
-   (add-to-list 'LaTeX-verbatim-environments-local "BVerbatim*")
-   (add-to-list 'LaTeX-verbatim-environments-local "LVerbatim")
-   (add-to-list 'LaTeX-verbatim-environments-local "LVerbatim*")
-   (add-to-list 'LaTeX-verbatim-environments-local "SaveVerbatim")
    (add-to-list 'LaTeX-verbatim-environments-local "VerbatimOut")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "EscVerb*")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "EscVerb")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "path")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "url")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "nolinkurl")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperbaseurl")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperimage")
-   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperref")
+   (add-to-list 'LaTeX-verbatim-environments-local "SaveVerbatim")
+   (add-to-list 'LaTeX-verbatim-environments-local "LVerbatim*")
+   (add-to-list 'LaTeX-verbatim-environments-local "LVerbatim")
+   (add-to-list 'LaTeX-verbatim-environments-local "BVerbatim*")
+   (add-to-list 'LaTeX-verbatim-environments-local "BVerbatim")
+   (add-to-list 'LaTeX-verbatim-environments-local "Verbatim*")
+   (add-to-list 'LaTeX-verbatim-environments-local "Verbatim")
    (add-to-list 'LaTeX-verbatim-macros-with-braces-local "href")
-   (add-to-list 'LaTeX-verbatim-macros-with-delims-local "path")
-   (add-to-list 'LaTeX-verbatim-macros-with-delims-local "Verb")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperref")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperimage")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "hyperbaseurl")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "nolinkurl")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "url")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "path")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "EscVerb")
+   (add-to-list 'LaTeX-verbatim-macros-with-braces-local "EscVerb*")
    (add-to-list 'LaTeX-verbatim-macros-with-delims-local "Verb*")
+   (add-to-list 'LaTeX-verbatim-macros-with-delims-local "Verb")
+   (add-to-list 'LaTeX-verbatim-macros-with-delims-local "path")
    (TeX-run-style-hooks
     "latex2e"
     "article"
@@ -77,34 +77,34 @@
     '("EFk" 1)
     '("EFD" 1))
    (LaTeX-add-labels
-    "sec:org7a3a11c"
-    "sec:org1ee37d3"
-    "sec:org648d4b6"
-    "sec:org8bc0690"
-    "sec:org4b90439"
-    "sec:orgdf761ad"
-    "sec:org242fd4d"
-    "sec:orgbd91cf5"
-    "sec:orge0a0cb3"
-    "sec:orge71ed41"
-    "sec:org306f64e"
-    "sec:org5966663"
-    "sec:org26bd7e8"
-    "sec:orgf2cbabf"
-    "sec:orgca38cc4"
-    "sec:org3b244b5"
-    "sec:orgff506b2"
-    "sec:org272179c"
-    "sec:orga5b9eb0"
-    "sec:orgb793f33"
-    "sec:orgceee7fc"
-    "sec:orga6e00be"
-    "sec:org28a6f1a"
-    "sec:orgdcc6828"
-    "sec:org3c5061c"
-    "sec:org7aaa966"
-    "sec:org346dd35"
-    "sec:org2fc28e3")
+    "sec:org5ae5faa"
+    "sec:orga506a2e"
+    "sec:orge5ab2bf"
+    "sec:org0c71eb1"
+    "sec:org63aa24e"
+    "sec:org09de8f2"
+    "sec:orgf57b4a6"
+    "sec:org9f3c667"
+    "sec:orgbf80c9c"
+    "sec:org8db77bd"
+    "sec:org66280c0"
+    "sec:orga4be1a2"
+    "sec:org8abaedb"
+    "sec:orgba64c7d"
+    "sec:orga6c680a"
+    "sec:org235ccac"
+    "sec:orgd9d82d5"
+    "sec:org6ba02a5"
+    "sec:org9debea8"
+    "sec:orge86b719"
+    "sec:org455a30f"
+    "sec:orgc14c26e"
+    "sec:orgaa8eb12"
+    "sec:orgac6d72f"
+    "sec:orge7d6145"
+    "sec:org23de98f"
+    "sec:org4c1573b"
+    "sec:org0718b0e")
    (LaTeX-add-bibliographies
     "ref")
    (LaTeX-add-xcolor-definecolors

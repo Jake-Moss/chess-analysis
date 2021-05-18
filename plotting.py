@@ -228,7 +228,7 @@ def plot_heatmap_grid(dfs: List, pieces: List[int], col_labels: List[str], colou
             )
 
     subplot_matrix_format(axs, grid, [chess.PIECE_NAMES[x].capitalize() for x in pieces], col_labels)
-    fig.savefig(f"./images/{username}_HEATMAP_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}_{['BLACK', 'WHITE'][colour]}_{bintype}.png", bbox_inches='tight')
+    # fig.savefig(f"./images/{username}_HEATMAP_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}_{['BLACK', 'WHITE'][colour]}_{bintype}.png", bbox_inches='tight')
     return fig, axs
 
 
@@ -280,7 +280,7 @@ def plot_heatmap_single_piece(df: pd.DataFrame, pieces: List[int], username: str
         )
 
     subplot_matrix_format(axs, (1, 2), [chess.PIECE_NAMES[piece].capitalize() for piece in pieces], col_labels)
-    fig.savefig(f"./images/{username}_HEATMAP_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}.png", bbox_inches='tight')
+    # fig.savefig(f"./images/{username}_HEATMAP_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}.png", bbox_inches='tight')
     return fig, axs
 
 
@@ -346,7 +346,7 @@ def plot_hist_grid(dfs: List, pieces: List[int], col_labels: List[str], colour: 
                 axs[row][col].set_ylim(ymin=0, ymax=np.max(local_maxs[row])*1.1)
 
     subplot_matrix_format(axs, grid, [chess.PIECE_NAMES[x].capitalize() for x in pieces], col_labels)
-    fig.savefig(f"./images/{username}_{'KDE' if kde else 'HIST'}_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}_{['BLACK', 'WHITE'][colour]}_{bintype}.png", bbox_inches='tight')
+    # fig.savefig(f"./images/{username}_{'KDE' if kde else 'HIST'}_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}_{['BLACK', 'WHITE'][colour]}_{bintype}.png", bbox_inches='tight')
     return fig, axs
 
 
@@ -396,5 +396,5 @@ def plot_hist_single_piece(df: pd.DataFrame, pieces: List[int], \
             axs[0][colour].set_ylim(ymin=0, ymax=np.max(local_maxs)*1.1)
 
     subplot_matrix_format(axs, (1, 2), [chess.PIECE_NAMES[x].capitalize() for x in pieces], col_labels)
-    fig.savefig(f"./images/{username}_{'KDE' if kde else 'HIST'}_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}.png", bbox_inches='tight')
+    # fig.savefig(f"./images/{username}_{'KDE' if kde else 'HIST'}_{'_'.join([chess.PIECE_NAMES[x].capitalize() for x in pieces])}.png", bbox_inches='tight')
     return fig, axs

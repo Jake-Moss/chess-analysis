@@ -17,12 +17,12 @@ from plotting import *
 def main():
     filename = "./Dataframes/" + "The big one" + ".csv"
 
-    # patterns = ["World", "Champ", "Candidates", "Interzonal", "PCA"]
+    patterns = ["World", "Champ", "Candidates", "Interzonal", "PCA"]
     # patterns = ["2000"]
     # patterns = ["World"]
-    patterns = ["Dae"]
-    # directory = r'/home/jake/Downloads/pgn/'
-    directory = r'./pgn/'
+    # patterns = ["Dae"]
+    directory = r'/home/jake/Downloads/pgn/'
+    # directory = r'./pgn/'
     # directory = r'./pgn/FISC'
     dfs = []
     list_of_games = []
@@ -80,23 +80,23 @@ def main():
     # fig, axs = plot_hist_grid(bins, pieces, col_labels, chess.WHITE, bintype, username="DaenaliaEvandruile")
 
 
-    # fig, axs = plot_heatmap_grid(bins, pieces, col_labels, chess.BLACK, bintype)
-    # fig, axs = plot_heatmap_grid(bins, pieces, col_labels, chess.WHITE, bintype)
-    # fig, axs = plot_hist_grid(bins, pieces, col_labels, chess.BLACK, bintype)
-    # fig, axs = plot_hist_grid(bins, pieces, col_labels, chess.WHITE, bintype)
+    fig, axs = plot_heatmap_grid(bins, pieces, col_labels, chess.BLACK, bintype)
+    fig, axs = plot_heatmap_grid(bins, pieces, col_labels, chess.WHITE, bintype)
+    fig, axs = plot_hist_grid(bins, pieces, col_labels, chess.BLACK, bintype)
+    fig, axs = plot_hist_grid(bins, pieces, col_labels, chess.WHITE, bintype)
 
-    # # DATE
-    # minimum, low, mid, high, maximum = df["Date"].quantile([0, 0.25, 0.5, 0.75, 1])
-    # bins_ranges = [minimum, low, mid, high, maximum]
-    # # bins_ranges = [pd.to_datetime("1700"), pd.to_datetime("1900"), pd.to_datetime("1980"), pd.to_datetime("2010"), pd.to_datetime("2025")]
+    # DATE
+    minimum, low, mid, high, maximum = df["Date"].quantile([0, 0.25, 0.5, 0.75, 1])
+    bins_ranges = [minimum, low, mid, high, maximum]
+    # bins_ranges = [pd.to_datetime("1700"), pd.to_datetime("1900"), pd.to_datetime("1980"), pd.to_datetime("2010"), pd.to_datetime("2025")]
 
-    # bins = []
-    # col_labels = []
-    # for lower, upper in zip(bins_ranges[:-1], bins_ranges[1:]):
-    #     print(f"Date in range {lower.year}-{upper.year}")
-    #     bins.append(df[in_range(lower, df["Date"], upper)])
-    #     col_labels.append(f"{lower.year} to {upper.year}\nQ{len(bins)-1} - Q{len(bins)}")
-    # bintype = "DATE"
+    bins = []
+    col_labels = []
+    for lower, upper in zip(bins_ranges[:-1], bins_ranges[1:]):
+        print(f"Date in range {lower.year}-{upper.year}")
+        bins.append(df[in_range(lower, df["Date"], upper)])
+        col_labels.append(f"{lower.year} to {upper.year}\nQ{len(bins)-1} - Q{len(bins)}")
+    bintype = "DATE"
 
     # fig, axs = plot_heatmap_grid(bins, pieces, col_labels, chess.BLACK, bintype, username="DaenaliaEvandruile")
     # fig, axs = plot_heatmap_grid(bins, pieces, col_labels, chess.WHITE, bintype, username="DaenaliaEvandruile")
@@ -104,10 +104,10 @@ def main():
     # fig, axs = plot_hist_grid(bins, pieces, col_labels, chess.BLACK, bintype, username="DaenaliaEvandruile")
     # fig, axs = plot_hist_grid(bins, pieces, col_labels, chess.WHITE, bintype, username="DaenaliaEvandruile")
 
-    # fig, axs = plot_heatmap_grid(bins, pieces, col_labels, chess.BLACK, bintype)
-    # fig, axs = plot_heatmap_grid(bins, pieces, col_labels, chess.WHITE, bintype)
-    # fig, axs = plot_hist_grid(bins, pieces, col_labels, chess.BLACK, bintype)
-    # fig, axs = plot_hist_grid(bins, pieces, col_labels, chess.WHITE, bintype)
+    fig, axs = plot_heatmap_grid(bins, pieces, col_labels, chess.BLACK, bintype)
+    fig, axs = plot_heatmap_grid(bins, pieces, col_labels, chess.WHITE, bintype)
+    fig, axs = plot_hist_grid(bins, pieces, col_labels, chess.BLACK, bintype)
+    fig, axs = plot_hist_grid(bins, pieces, col_labels, chess.WHITE, bintype)
 
 
 
@@ -115,15 +115,15 @@ def main():
 
 
 
-    fig, axs = plot_heatmap_single_piece(df, [chess.PAWN], username="DaenaliaEvandruile", cmap=sns.color_palette("viridis", as_cmap=True))
+    # fig, axs = plot_heatmap_single_piece(df, [chess.PAWN], username="DaenaliaEvandruile", cmap=sns.color_palette("viridis", as_cmap=True))
     # fig, axs = plot_heatmap_single_piece(df, [chess.PAWN], bintype)
 
-    # for piece in chess.PIECE_TYPES[:-1]:
+    for piece in chess.PIECE_TYPES[:-1]:
         # fig, axs = plot_heatmap_single_piece(df, [piece], username="DaenaliaEvandruile")
-        # fig, axs = plot_heatmap_single_piece(df, [piece])
+        fig, axs = plot_heatmap_single_piece(df, [piece])
 
         # fig, axs = plot_hist_single_piece(df, [piece], username="DaenaliaEvandruile")
-        # fig, axs = plot_hist_single_piece(df, [piece])
+        fig, axs = plot_hist_single_piece(df, [piece])
 
 
 

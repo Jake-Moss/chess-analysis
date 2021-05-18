@@ -144,7 +144,6 @@ A similar spread increase can be seen in the Queens. Higher ELO players tend to 
 
 Bishops, Knights, and Pawns do not display a pattern change between ELOs suggesting most players know common and effective positioning. These position are common knowledge and often taught. Although there is negligible change in the patterns, the frequency at which they are lost becomes more concentrated. This may indicate that higher ELO player are more likely to keep these pieces near positions where they are strongest.
 
-
 A similar plot as ~Figure 1~ is attached in the [[*Appendix][Appendix]] which instead shows Black pieces. There is no note worthy pattern difference between the Black and White plot. All treads are present but with \(180^{\circ}\) rotation.
 
 #+attr_org: :width 200
@@ -235,7 +234,7 @@ Due to the complexity, design approach, and extent of this project, I believe it
 [[bibliography:./ref.bib]]
 \newpage
 * Appendix
-[[https://github.com/Jake-Moss/chess-analysis/tree/master/Images][This repository]] is the best place to view these images, under the ~Images/~ folder.
+[[https://github.com/Jake-Moss/chess-analysis/tree/master/Images][This repository]] is the best place to view these images, under the ~Images/~ folder as well as the source code for this project. ~main.py~ contains all plots shown here.
 ** ELO Grids (FISC)
 #+attr_org: :width 200
 #+attr_latex: :width \textwidth
